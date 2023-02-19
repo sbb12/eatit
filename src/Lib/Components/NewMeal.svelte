@@ -81,20 +81,18 @@
         <ul class="flex flex-col items-center w-full">
             {#each foods as food}
             <li class="border inline-flex justify-between w-full px-2 py-1 my-1" title="{food.description}">
-                <p>
-                    {food.name}
-                </p>
-                <div class="inline-flex items-center">
-                    {food.cal}cal
-                    <button type="button" class="pl-2" on:click={ () => { name=food.name, calories=food.cal, addMeal()}} on:keypress>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </button>
-
-                </div>
-
-                
+                    <p>
+                        {food.name}
+                    </p>
+                    <div class="inline-flex items-center">
+                        {food.cal}cal
+                        <button type="button" class="pl-2" on:click={ () => { name=food.name, calories=food.cal, addMeal()}} on:keypress>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                        
+                    </div>
             </li>
             {/each}
         </ul>
