@@ -47,7 +47,6 @@
 
     onMount(async () => {
         const data = await getWeightData();
-        console.log(data);
         drawChart(data);
     })
 

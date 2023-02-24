@@ -1,5 +1,5 @@
 <script>
-    import DayTracker from '../Lib/Components/DayTracker.svelte';
+    import DayTracker from '../Lib/Components/tracker/DayTracker.svelte';
 
     const now = new Date();
 

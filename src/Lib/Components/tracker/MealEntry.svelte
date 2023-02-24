@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { pb } from '../pb/pocketbase';
+    import { pb } from '../../pb/pocketbase';
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
 

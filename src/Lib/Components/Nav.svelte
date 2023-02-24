@@ -14,7 +14,7 @@
     <div class="middle p-4">
         <div class="items">
             <a href="/">Track</a>
-            <a href="/meals">Meals</a>
+            <!-- <a href="/meals">Meals</a> -->
             <a href="/foods">Foods</a>
             <a href="/history">History</a>
         </div>

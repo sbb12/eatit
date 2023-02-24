@@ -1,10 +1,9 @@
 <script lang='ts'>
-	import { currentUser, pb } from '../pb/pocketbase';
+	import { currentUser, pb } from '../../pb/pocketbase';
     import { onMount } from 'svelte';
     import MealEntry from './MealEntry.svelte';
     import NewMeal from './NewMeal.svelte';
     import Weight from './Weight.svelte';
-	import type { List } from 'postcss/lib/list';
 
     let weight: number|null = null;
     let calGoal: number = 2000;
@@ -54,22 +53,16 @@
             sort: 'created'
         })
         meals = meals_resp.items;
-
-        console.log(entry.id)
         
         // calculate calories consumed
         meals.forEach(meal => {
             calConsumed += meal.calories;
-        })
-
-       
-        
+        })   
 
     })
 
      // add meal fucntion
      function addMeal(event: any) {
-        console.log(event.detail)
         const mealid = event.detail.id;
         const mealname = event.detail.name;
         const mealcal = event.detail.calories;
