@@ -5,11 +5,9 @@
     export let food: any;
     let quantity: number = 1;
     
-    const options = JSON.parse(food.options);
-    let measure = options[0].measure;
-    $: calories = quantity * options.find((option: any) => option.measure === measure).cal;
-
-
+    $: options = JSON.parse(food.options);
+    $: measure = options[0].measure;
+    $: calories = Math.round(quantity * options.find((option: any) => option.measure === measure).cal);
 
     function addMeal() {
         dispatch('addMeal', {
