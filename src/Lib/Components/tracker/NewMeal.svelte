@@ -1,26 +1,17 @@
 <script lang="ts">
 
     import { pb } from '../../pb/pocketbase';
+    import FoodOption from './FoodOption.svelte';
     import { createEventDispatcher } from 'svelte';
-	import Login from './../Login.svelte';
-	import { parse } from 'postcss';
     const dispatch = createEventDispatcher();
 
     export let dayID: string;
     let name:string = '';
-    let calories:number;    
-    let adding: boolean = true;
+    let adding: boolean = false;
     let foods: any[] = [];
 
     let quickName: string = '';
-    let quickCalories: number;
-
-    let selectedFood: any;
-
-
-    let measures: string[] = ['calories'];
-    let measure: string;
-    let quantity: number = 1;
+    let quickQuantity: number;
 
     $: {name, searchFoods()}
 
@@ -34,32 +25,77 @@
                 filter: 'name ~ "' + name + '"',
                 sort: 'created'
             })
-            foods = results.items;
-            console.log( JSON.parse(foods[0].options) )
+            foods = results.items.map((food) => {
+                return {
+                    id: food.id,
+                    image: food.image,
+                    name: food.name,
+                    options: food.options
+                }
+            });
         } catch (error) {
             console.log(error)
         }
     }
 
-    async function quickAdd(){
-
+    async function getFood(id: string){
+        try{
+            const food = await pb.collection('foods_basic').getOne(id, {});
+            return food;
+        } catch (error) {
+            console.log(error)
+            return false;
+        }
     }
 
-    async function addMeal() {
-        const data={
-            name: name,
-            calories: calories,
+    async function quickAdd(){
+
+        const food = await getFood('3lp4ntv6p0efkmn'); // id of basic food
+        if (!food) {
+            console.log("couldn't fetch quick cal food data")
+            return;
+        }
+
+        const data = {
+            name: quickName,
+            food_id: '3lp4ntv6p0efkmn',
+            quantity: quickQuantity,
+            measure: 'cal',
+            calories: Math.round(quickQuantity * JSON.parse(food.options)[0].cal),
             day: dayID
         }
+
         try {
-            const newMeal = await pb.collection('meal_entry').create(data);
-            dispatch('addMeal', newMeal);
+            const newEntry = await pb.collection('meal_entry').create(data);
+            dispatch('addMeal', {
+                entry: newEntry,
+                food: food
+            });           
         } catch (error) {
             console.log(error);
         }
-        adding = false;
-        name = '';
-        calories = 0;
+
+    }
+
+    async function addMeal(event: any) {
+        const data = {
+            name: event.detail.name,
+            food_id: event.detail.id,
+            quantity: event.detail.quantity,
+            measure: event.detail.measure,
+            calories: Math.round(event.detail.calories),
+            day: dayID
+        }
+
+        try {
+            const newEntry = await pb.collection('meal_entry').create(data);
+            dispatch('addMeal', {
+                entry: newEntry,
+                food: event.detail.food
+            });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 </script>
@@ -81,7 +117,7 @@
             <form on:submit|preventDefault={quickAdd} class="grid grid-cols-7">
                 <h2 class="col-span-7 p-2 mx-auto">Quick Add Food</h2>
                 <input type="text" placeholder="name" bind:value={quickName} class="col-span-4 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
-                <input type="number" placeholder="calories" bind:value="{quickCalories}" class="p-2 col-span-2 mx-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
+                <input type="number" placeholder="calories" bind:value="{quickQuantity}" class="p-2 col-span-2 mx-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
                 <button type="button"  on:click={ quickAdd } on:keypress class="mx-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -96,79 +132,18 @@
                 {#if foods.length > 0}
                     <ul class="col-span-full">
                         {#each foods as food}
-                            <li on:click={() => {selectedFood = food}} on:keypress class="grid grid-cols-7 items-center justify-center">
-                                <img src="{food.image}" alt="{food.name}" class="col-span-1">
-                                <p class="col-span-3">{food.name}</p>
-                                <p class="col-span-1">{JSON.parse(food.options)[0].measure}</p>
-                                <p>option1</p>
-                                <p>cal</p>>
-                            </li>
+                            <FoodOption {food} on:addMeal={addMeal}/>
                         {/each}
                     </ul>
                 {/if}
-
-
-
-                <!-- <input type="number" placeholder="qty" bind:value={quantity}>
-                <select bind:value={measure}>
-                    {#each measures as measure}
-                        <option value="{measure}">{measure}</option>
-                    {/each}
-                </select> -->
-                
-
-                <!-- <button type="submit" >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-10 h-10">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button> -->
             </form>
-            <!-- <button type="button" on:click={() => adding = false}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button> -->
         </div>
-        
-        <ul class="flex flex-col items-center w-full">
-            {#each foods as food}
-            <li class="border inline-flex justify-between w-full px-2 py-1 my-1" title="{food.description}">
-                    <p>
-                        {food.name}
-                    </p>
-                    <div class="inline-flex items-center">
-                        {food.cal}cal
-                        <button type="button" class="pl-2" on:click={ () => { name=food.name, calories=food.cal, addMeal()}} on:keypress>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </button>
-                        
-                    </div>
-            </li>
-            {/each}
-        </ul>
     </div>
     {/if}
 </div>
 
 
 
-
-<!-- <style>
-    form {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        border-radius: 4px;
-        padding: 2px;
-        border: 1px solid black;
-    }
-
-    /* input type number */
-    input[type=number]{
-        padding: 5px;
-        width: 50px
-    }
-
-</style> -->
+<style>
+    
+</style>

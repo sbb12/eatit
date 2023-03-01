@@ -4,25 +4,37 @@
     import MealEntry from './MealEntry.svelte';
     import NewMeal from './NewMeal.svelte';
     import Weight from './Weight.svelte';
+    
+    import type { Meal } from '../../types/meals';
 
     let weight: number|null = null;
-    let calGoal: number = 2000;
+    let calGoal: number = 1501;
     let calConsumed: number = 0;
     $: calLeft = calGoal - calConsumed;
 
     export let date: Date;  
-    if (!date) date = new Date();
+    if (!date) {
+        date = new Date();
+    }
     const dateString: string = date.toISOString().split('T')[0];
 
     let entry: any;
     let meals: any[] = [];
 
-    let meals_resp: any;
+    $: {meals, calcCal()}
+    
+    function calcCal(){
+        calConsumed = meals.reduce((acc, meal) => {
+            return acc + meal.calories;
+        }, 0);
+        calLeft = calGoal - calConsumed;
+        
+    }
+
 
     onMount( async () => {
         // fetch user data to get calorie goal
         const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
-
         calGoal = record.cal_goal;
 
         // get day entry
@@ -42,7 +54,6 @@
         } else {
             entry = day_resp.items[0];
         }
-
         // set weight
         weight = entry.weight;
 
@@ -50,48 +61,61 @@
         // get meals for this day
         let meals_resp = await pb.collection('meal_entry').getList(1, 50, {
             filter: 'day.id = "' + entry.id + '"',
+            expand: 'food_id',
             sort: 'created'
         })
-        meals = meals_resp.items;
-        
-        // calculate calories consumed
-        meals.forEach(meal => {
-            calConsumed += meal.calories;
-        })   
+        meals = meals_resp.items.map((m) => {
+            return {
+                id: m.id,
+                name: m.name,
+                measure: m.measure,
+                quantity: m.quantity,
+                calories: m.calories,
+                food: m.expand.food_id,
+            }
+        });
 
     })
 
-     // add meal fucntion
-     function addMeal(event: any) {
-        const mealid = event.detail.id;
-        const mealname = event.detail.name;
-        const mealcal = event.detail.calories;
 
-        const meal = {
-            id: mealid,
-            name: mealname,
-            calories: mealcal,
-        }
-
-        meals = [...meals, meal]
-        calConsumed += meal.calories;
+    function removeMeal(event: any){
+        meals = meals.filter((m) => m.id !== event.detail.id);
     }
 
-    // remove meal function
-    function removeMeal(event: any) {
-        calConsumed -= meals.find(m => m.id === event.detail.id).calories;
-        meals = meals.filter(m => m.id !== event.detail.id)
+
+    function addMeal(event: any){
+        const meal = {
+            id: event.detail.entry.id,
+            name: event.detail.entry.name,
+            measure: event.detail.entry.measure,
+            quantity: event.detail.entry.quantity,
+            calories: event.detail.entry.calories,
+            food: event.detail.food,
+        }
+        meals = [...meals, meal];
+    }
+
+
+    function updateMeal(event: any){
+        meals = meals.map((m) => {
+            if (m.id === event.detail.id) {
+                return {
+                    ...m,
+                    quantity: event.detail.quantity,
+                    measure: event.detail.measure,
+                    calories: event.detail.calories,
+                }
+            } else {
+                return m;
+            }
+        })
     }
 
 </script>
 
-{#await meals_resp}
-    <div>loading...</div>
 
-{:then meal} 
+<div class="trackbox bg-gray-100 m-2 py-8 px-6  w-[550px]">
     
-
-<div class="trackbox bg-[#F6F6F6] m-2 py-8 px-6  w-[450px]">
     <div class="headers flex flex-row justify-between ">
         <div class="flex flex-col">
             <div class="inline-flex h-10">
@@ -121,16 +145,15 @@
         </div>
     </div>
 
-    <div class="flex flex-col mt-8 mb-1">
-        {#each meals as meal (meal.id)}
-            <MealEntry id={meal.id} name={meal.name} calories = {meal.calories} on:removeMeal={removeMeal}/>
+    <div class="my-10">
+        {#each meals as meal}
+            <MealEntry meal={meal} on:removeMeal={removeMeal} on:updateMeal={updateMeal}/>
         {/each}
     </div>
-
+    
     <NewMeal dayID = {entry?.id} on:addMeal={addMeal}/>
 </div>
 
-{/await}
 
 
 

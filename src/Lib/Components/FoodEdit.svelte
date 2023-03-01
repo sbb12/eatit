@@ -65,6 +65,14 @@
         }
     }
 
+    function calcInput(inputString: string) {
+        if (inputString.match(/^=.+;/)){
+            return eval(inputString.replace(/^=/, '').replace(/;$/, ''));
+        } else {
+            return inputString;
+        }
+    }
+
     onMount(async () => {
         if (id) {
             getFood();
@@ -75,7 +83,7 @@
 
 
 
-<form class="bg-[#F6F6F6] p-4 w-[450px] z-50 relative" >
+<form class="bg-[#F6F6F6] p-4 w-[550px] z-50 relative" >
     <input type="hidden" bind:value={id}>
     <button class="absolute top-2 right-4" type="button" on:click|preventDefault={closed}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">
@@ -104,11 +112,11 @@
         {#each options as option} 
         <div class="grid grid-cols-6 my-4 gap-4 text-center ">
             <input type="text" placeholder="Measure" bind:value={option.measure} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Calories" bind:value={option.cal} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Cost" bind:value={option.cost} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Proteins" bind:value={option.protein} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Fats" bind:value={option.fat} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Carbs" bind:value={option.carb} class="h-10 px-2 py-1">
+            <input type="text" placeholder="Calories" bind:value={option.cal} on:change={() => {option.cal = calcInput(option.cal)}} class="h-10 px-2 py-1">
+            <input type="text" placeholder="Cost" bind:value={option.cost}  on:change={() => {option.cost = calcInput(option.cost)}} class="h-10 px-2 py-1">
+            <input type="text" placeholder="Proteins" bind:value={option.protein} on:change={() => {option.protein = calcInput(option.protein)}}  class="h-10 px-2 py-1">
+            <input type="text" placeholder="Fats" bind:value={option.fat}  on:change={() => {option.fat = calcInput(option.fat)}} class="h-10 px-2 py-1">
+            <input type="text" placeholder="Carbs" bind:value={option.carb}  on:change={() => {option.carb = calcInput(option.carb)}} class="h-10 px-2 py-1">
             <input type="text" placeholder="Description" bind:value={option.desc} class="h-10 px-2 py-1 col-span-5">
             <button class="" type="button" on:click = {() => {removeOption(option.measure)}}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">

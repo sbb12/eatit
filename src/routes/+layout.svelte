@@ -1,10 +1,8 @@
 <script>
-    // import '@picocss/pico';
     import "../app.css";
-    
-    import Nav from "../Lib/Components/Nav.svelte";
-    import Login from "../Lib/Components/Login.svelte";
-    import { currentUser } from "../Lib/pb/pocketbase";
+    import Nav from "../lib/components/Nav.svelte";
+    import Login from "../lib/components/Login.svelte";
+    import { currentUser } from "../lib/pb/pocketbase";
 </script>
 
 {#if !$currentUser }
@@ -13,3 +11,4 @@
     <Nav />
     <slot />
 {/if}
+

@@ -1,5 +1,5 @@
 <script>
-    import FoodEdit from "../../../Lib/Components/FoodEdit.svelte";
+    import FoodEdit from "../../../lib/Components/FoodEdit.svelte";
 </script>
 
 <FoodEdit/>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentUser, pb } from "../pb/pocketbase";
+	import { pb } from "../pb/pocketbase";
 
     let email = '';
     let password = '';
@@ -31,8 +31,6 @@
 </script>
 
 <main class="flex justify-center">
-
-    
     <form on:submit|preventDefault class="flex flex-col w-[500px] my-8 text-center">
         <h1 class=" font-light text-4xl p-4 mb-3">Please log in or register</h1>
         

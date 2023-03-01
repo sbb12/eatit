@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { pb } from '../../pb/pocketbase';
-    import { createEventDispatcher } from 'svelte';
+    // import { createEventDispatcher } from 'svelte';
     
     export let weight: number|null = null;
     export let id: string;

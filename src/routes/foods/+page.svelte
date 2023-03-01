@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { pb } from "../../Lib/pb/pocketbase";
-    import FoodEdit from "../../Lib/Components/FoodEdit.svelte";
+    import { pb } from "../../lib/pb/pocketbase";
+    import FoodEdit from "../../lib/components/FoodEdit.svelte";
     
     let searchInput: string = 'yog';
     let foods: any[] = [];
@@ -39,7 +39,7 @@
 </script>
 
 
-<main class="mx-auto w-[450px] flex flex-col my-4 relative">
+<main class="mx-auto w-[550px] flex flex-col my-4 relative">
     {#if editing}
         <div class="absolute top-0">
             <FoodEdit id={editId} on:message={handleMessage}/>

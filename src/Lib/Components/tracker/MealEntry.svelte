@@ -2,45 +2,52 @@
 
     import { pb } from '../../pb/pocketbase';
     import { createEventDispatcher } from 'svelte';
+    
     const dispatch = createEventDispatcher();
-
-    export let id: string;
-    export let name: string;
-    export let calories: number;
+    
+    export let meal: any;
+    let id: string = meal.id; 
+    let food = meal.food;
+    let quantity: number = meal.quantity;
+    let measure: string = meal.measure;
+    let calories: number = meal.calories;    
+    let options = JSON.parse(food.options);
 
     function deleteEntry() {
         pb.collection('meal_entry').delete(id)
-        dispatch('removeMeal', {id: id});
+        dispatch('removeMeal', {id});
     }    
 
- // dispatch event to parent component?
+    async function updateMeal() {
+        calories = quantity * options.find((option: any) => option.measure == measure).cal;
+        calories = Math.round(calories);
+        const data = {
+            quantity: quantity,
+            measure: measure,
+            calories: calories
+        }
+        pb.collection('meal_entry').update(id, data);
+        
+        dispatch('updateMeal', {id, quantity, measure, calories})
+    }
+
 
 
 </script>
 
-<div class="meal-entry flex flex-row items-center p-2 bg-gray-200 my-1 w-full border-gray-400 border rounded-md">
-    <img src="https://via.placeholder.com/50" alt='placeholder' />
-    <div class="mx-4 w-[55%]">
-        <p class=" font-semibold text-lg">{name}</p>  
+<div class="meal-entry grid grid-cols-8 w-full rounded-sm items-center">
+    <img src="{food.image}" alt='placeholder' class="col-span-1 p-1 w-[50px] h-[50px]"/>
+    <p class="font-semibold text-md col-span-3 p-1">{meal.name}</p>  
+    <input type="number" class="col-span-1 w-[40px] bg-gray-100 focus:outline-none" bind:value={quantity} on:input={updateMeal}/>
+    <select class="col-span-1 m-[-1rem] bg-gray-100" bind:value={measure} on:change={updateMeal}>
+            {#each options as option}
+                <option value="{option.measure}" title="{option.desc ? option.desc : ''}">{option.measure}</option>
+            {/each}
+    </select>
+    <p class="col-span-1 ml-auto text-lg font-semibold text-purple-500">{calories}  <span class="text-md text-slate-600 font-normal"></span></p>
+    
+    <div class="col-span-1 mx-auto">
+        <button on:click={deleteEntry} class="">❌</button>
     </div>
-    <div class="w-[20%]">
-        <p class="text-lg font-bold text-purple-500">{calories} <span class="text-md text-slate-600 font-normal">cal</span></p>
-    </div>
-    <button on:click={deleteEntry} class=""><svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="17.5" cy="17.5" r="13.125" stroke="darkred" stroke-width="2"/>
-        <path d="M13.1251 21.8745L21.8751 13.1245" stroke="darkred" stroke-width="2"/>
-        <path d="M21.875 21.875L13.125 13.125" stroke="darkred" stroke-width="2"/>
-    </svg></button>
 
 </div>
-
-<style>
-    .meal-entry img {
-        width: 50px;
-        height: 50px;
-    }
-</style>
-
-
-
-    
