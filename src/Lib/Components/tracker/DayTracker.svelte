@@ -4,11 +4,9 @@
     import MealEntry from './MealEntry.svelte';
     import NewMeal from './NewMeal.svelte';
     import Weight from './Weight.svelte';
-    
-    import type { Meal } from '../../types/meals';
 
     let weight: number|null = null;
-    let calGoal: number = 1501;
+    let calGoal: number;
     let calConsumed: number = 0;
     $: calLeft = calGoal - calConsumed;
 
@@ -94,7 +92,6 @@
         }
         meals = [...meals, meal];
     }
-
 
     function updateMeal(event: any){
         meals = meals.map((m) => {

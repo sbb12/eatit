@@ -67,6 +67,9 @@
 
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
+            name = '';
+            quickName = '';
+            adding = false;
             dispatch('addMeal', {
                 entry: newEntry,
                 food: food
@@ -89,10 +92,13 @@
 
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
+            name = '';
+            adding = false;
             dispatch('addMeal', {
                 entry: newEntry,
                 food: event.detail.food
             });
+            
         } catch (error) {
             console.log(error);
         }
