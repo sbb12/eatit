@@ -16,5 +16,9 @@
     body::-webkit-scrollbar {
     display: none;
     }
+
+    input.input-error {
+        outline: 1px solid red;
+    }
     
 }

@@ -5,9 +5,11 @@
     export let food: any;
     let quantity: number = 1;
     
-    $: options = JSON.parse(food.options);
-    $: measure = options[0].measure;
-    $: calories = Math.round(quantity * options.find((option: any) => option.measure === measure).cal);
+    let options = JSON.parse(food.options);
+    let measure = options[0].measure;
+    let calories: number = 0;
+
+    $: calories =  Math.round(quantity * options.find((option: any) => option.measure === measure).cal);
 
     function addMeal() {
         dispatch('addMeal', {
@@ -28,7 +30,7 @@
     <p class="col-span-3 p-1">{food.name}</p>  
     <input type="number" placeholder="qty" bind:value={quantity} class="px-1 mr-2 focus:outline-none h-6 rounded-sm drop-shadow">
     <select class="col-span-1 focus:outline-none h-6 mr-[-20px] rounded-sm drop-shadow" bind:value={measure}>
-        {#each options as option}
+        {#each options as option (option)}
                 <option value="{option.measure}" title="{option.desc ? option.desc : ''}" >
                     {option.measure}
                 </option>

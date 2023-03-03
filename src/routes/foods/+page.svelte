@@ -2,7 +2,7 @@
     import { pb } from "../../lib/pb/pocketbase";
     import FoodEdit from "../../lib/components/FoodEdit.svelte";
     
-    let searchInput: string = 'yog';
+    let searchInput: string = '';
     let foods: any[] = [];
     let editId: string|null = null;
     let editing: boolean = false;

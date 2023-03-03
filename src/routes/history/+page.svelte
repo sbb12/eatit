@@ -53,7 +53,7 @@
 
 </script>
 
-<div style="width: 800px">
+<div style="width: 800px mx-auto">
     <canvas bind:this={chartEl}>
         
     </canvas>
