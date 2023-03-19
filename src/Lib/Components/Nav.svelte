@@ -8,47 +8,24 @@
 </script>
 
 <nav class="flex w-full justify-between bg-slate-200">
-    <div class="logo p-4">
+    <div class=" text-2xl font-bold p-4">
         Logo
     </div>
-    <div class="middle p-4">
-        <div class="items">
-            <a href="/">Track</a>
+    <div class="flex items-center p-4">
+        <div class="flex items-center">
+            <a href="/" class="ml-4">Track</a>
             <!-- <a href="/meals">Meals</a> -->
-            <a href="/foods">Foods</a>
-            <a href="/history">History</a>
+            <a href="/foods" class="ml-4">Foods</a>
+            <a href="/history" class="ml-4">History</a>
+            <a href="/recipes" class="ml-4">Recipes</a>
         </div>
     </div>
-    <div class="right p-4">
+    <div class="flex items-center p-4">
         <a href="/" on:click={logout}>Logout</a>
     </div>
-    <div class="burger hidden"> = </div>
+    <div class="text-2xl font-bold ml-4 hidden"> = </div>
 </nav>
 
 
-<style>
-    .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-    .middle {
-        display: flex;
-        align-items: center;
-    }
-    .right {
-        display: flex;
-        align-items: center;
-    }
-    .items {
-        display: flex;
-        align-items: center;
-    }
-    .items a {
-        margin-left: 1rem;
-    }
-    .burger {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-left: 1rem;
-    }
+<style>    
 </style>

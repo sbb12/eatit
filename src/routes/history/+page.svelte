@@ -53,10 +53,18 @@
 
 </script>
 
-<div style="width: 800px mx-auto">
+<div >
     <canvas bind:this={chartEl}>
         
     </canvas>
 </div>
 
 
+
+<style>
+    canvas {
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+    }
+</style>

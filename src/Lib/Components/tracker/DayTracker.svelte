@@ -4,11 +4,19 @@
     import MealEntry from './MealEntry.svelte';
     import NewMeal from './NewMeal.svelte';
     import Weight from './Weight.svelte';
+    import NutritionPie from './NutritionPie.svelte';
 
     let weight: number|null = null;
     let calGoal: number;
     let calConsumed: number = 0;
     $: calLeft = calGoal - calConsumed;
+
+
+    let protein: number = 0;
+    let carbs: number = 0;
+    let fat: number = 0;
+    let cost: number = 0;
+
 
     export let date: Date;  
     if (!date) {
@@ -19,14 +27,25 @@
     let entry: any;
     let meals: any[] = [];
 
-    $: {meals, calcCal()}
+    $: {meals, mealCalc()}
     
-    function calcCal(){
-        calConsumed = meals.reduce((acc, meal) => {
-            return acc + meal.calories;
-        }, 0);
+    function mealCalc(){
+        protein = 0;
+        carbs = 0;
+        fat = 0;
+        calConsumed = 0;
+        cost = 0;
+
+        meals.forEach((meal) => {
+            protein += meal.protein;
+            carbs += meal.carbs;
+            fat += meal.fat;
+            calConsumed += meal.calories;
+            cost += parseFloat(meal.cost);
+        })
+
+        cost = cost.toFixed(2);
         calLeft = calGoal - calConsumed;
-        
     }
 
 
@@ -69,6 +88,10 @@
                 measure: m.measure,
                 quantity: m.quantity,
                 calories: m.calories,
+                protein: m.protein,
+                carbs: m.carbs,
+                fat: m.fat,
+                cost: m.cost,
                 food: m.expand.food_id,
             }
         });
@@ -82,12 +105,18 @@
 
 
     function addMeal(event: any){
+        console.log('addmeal', event.detail)
+
         const meal = {
             id: event.detail.entry.id,
             name: event.detail.entry.name,
             measure: event.detail.entry.measure,
             quantity: event.detail.entry.quantity,
             calories: event.detail.entry.calories,
+            protein: event.detail.entry.protein,
+            carbs: event.detail.entry.carbs,
+            fat: event.detail.entry.fat,
+            cost: event.detail.entry.cost,
             food: event.detail.food,
         }
         meals = [...meals, meal];
@@ -161,6 +190,8 @@
     
     <NewMeal dayID = {entry?.id} on:addMeal={addMeal}/>
 </div>
+
+<NutritionPie labels={['protein', 'carbs', 'fat']} values={[protein, carbs, fat]} {cost} />
 
 
 

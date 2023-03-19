@@ -6,7 +6,7 @@
 
 </script>
 
-<div class="flex justify-center items-center">
+<div class="flex justify-center">
     <DayTracker date ={now}/>
 </div>
 

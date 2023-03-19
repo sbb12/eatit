@@ -12,12 +12,18 @@
     $: calories =  Math.round(quantity * options.find((option: any) => option.measure === measure).cal);
 
     function addMeal() {
+
+        const option = options.find((option: any) => option.measure === measure);
         dispatch('addMeal', {
             name: food.name,
             id: food.id, 
             quantity: quantity, 
             measure: measure,
-            calories: quantity * options.find((option: any) => option.measure === measure).cal,
+            calories: quantity * option.cal,
+            protein: quantity * option.protein,
+            carbs: quantity * option.carb,
+            fat: quantity * option.fat,
+            cost: quantity * option.cost,
             food:food
         })
     }

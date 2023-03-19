@@ -84,12 +84,19 @@
     }
 
     async function addMeal(event: any) {
+
+        console.log('newmeal', event.detail)
+
         const data = {
             name: event.detail.name,
             food_id: event.detail.id,
             quantity: event.detail.quantity,
             measure: event.detail.measure,
-            calories: Math.round(event.detail.calories),
+            calories: Math.round(event.detail.calories),    
+            protein: Math.round(event.detail.protein),
+            carbs: Math.round(event.detail.carbs),
+            fat: Math.round(event.detail.fat),
+            cost: parseFloat(event.detail.cost.toFixed(2)),
             day: dayID
         }
 
