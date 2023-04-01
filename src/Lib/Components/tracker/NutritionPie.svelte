@@ -9,12 +9,13 @@
     
     let chartEl: HTMLCanvasElement;
     let chart;
-
-    $: {cost; updateChart()};
     
+    $: {values; updateChart()};
+    
+    //update chart with new data
     function updateChart() {
-        if (chart) {
-          console.log('updating chart')
+      if (chart){
+        console.log(chart.config.data.datasets[0].data = values)
         chart.update();
       }
     }
@@ -36,8 +37,8 @@
   
   
     onMount(() => {
-      const ctx:CanvasRenderingContext2D = chartEl.getContext('2d');
-  
+      const ctx: CanvasRenderingContext2D = chartEl.getContext('2d');
+      
       chart = new Chart(ctx, {
         type: 'pie',
         data: {

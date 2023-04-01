@@ -7,7 +7,7 @@
     export let id: string|null = null;
     let name: string;
     let barcode: string;
-    let image: string = 'https://via.placeholder.com/150';
+    let image: string = '/imgs/placeholder.webp';
     let options: any = [];
 
     let editingPicture: boolean = false;

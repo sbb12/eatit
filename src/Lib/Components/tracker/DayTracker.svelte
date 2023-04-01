@@ -160,7 +160,7 @@
                 <p class="text-slate-600 text-[20px] leading-[2.7]" >Remaining</p>
             </div>
             <div class="inline-flex">
-                <p class="w-[100px] text-right pr-4 text-[#FCCA46]">{calConsumed}</p>
+                <p class="w-[100px] text-right pr-4 text-[#619B8A]">{calConsumed}</p>
                 <p class="text-slate-400">Consumed</p>
             </div> 
             <div class="inline-flex">
