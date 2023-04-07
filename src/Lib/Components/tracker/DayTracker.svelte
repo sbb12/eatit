@@ -48,7 +48,6 @@
         calLeft = calGoal - calConsumed;
     }
 
-
     onMount( async () => {
         // fetch user data to get calorie goal
         const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
@@ -98,11 +97,9 @@
 
     })
 
-
     function removeMeal(event: any){
         meals = meals.filter((m) => m.id !== event.detail.id);
     }
-
 
     function addMeal(event: any){
         console.log('addmeal', event.detail)
@@ -151,7 +148,7 @@
 </script>
 
 
-<div class="trackbox bg-gray-100 m-2 py-8 px-6  w-[550px]">
+<div class="trackbox bg-gray-100 m-2 py-8 px-6  w-[550px] max-w-full">
     
     <div class="headers flex flex-row justify-between ">
         <div class="flex flex-col">

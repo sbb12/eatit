@@ -25,15 +25,19 @@
         }
     }
 
-    function handleMessage(event: Event){
-        if (event.detail.action === 'closed') {
-            editing = false;
-            editId = null;
-        } else {
-            //refresh food list
-            editing = false;
-            searchFoods();
-        }
+    function handleClose(event: Event){
+        editing = false;
+        editId = null;
+    }
+
+    function handleUpdate(event: Event){
+        editing = false;
+        editId = null;
+    }
+
+    function handleCreate(event: Event){
+        editing = false;
+        editId = null;
     }
 
 </script>
@@ -42,7 +46,7 @@
 <main class="mx-auto w-[550px] flex flex-col my-4 relative">
     {#if editing}
         <div class="absolute top-0">
-            <FoodEdit id={editId} on:message={handleMessage}/>
+            <FoodEdit id={editId} on:close={handleClose} on:update={handleUpdate} on:create={handleCreate}/>
         </div>
     {:else}
         <input type="text" bind:value={searchInput} placeholder="Search by name" class="w-full shadow appearance-none border rounded py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">

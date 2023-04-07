@@ -19,7 +19,7 @@
     }    
 
     async function updateMeal() {
-        calories = quantity * options.find((option: any) => option.measure == measure).cal;
+        calories = quantity * options.find((option: any) => option.measure == measure).calories;
         calories = Math.round(calories);
         const data = {
             quantity: quantity,
@@ -37,7 +37,7 @@
 
 <div class="meal-entry grid grid-cols-8 w-full rounded-sm items-center">
     <img src="{food.image}" alt='placeholder' class="col-span-1 p-1 w-[50px] h-[50px]"/>
-    <p class="font-semibold text-md col-span-3 p-1">{meal.name}</p>  
+    <p class="font-semibold text-sm col-span-3 p-1 ">{meal.name}</p>  
     <input type="number" class="col-span-1 w-[40px] bg-gray-100 focus:outline-none" bind:value={quantity} on:input={updateMeal}/>
     <select class="col-span-1 m-[-1rem] bg-gray-100" bind:value={measure} on:change={updateMeal}>
             {#each options as option}

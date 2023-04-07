@@ -5,10 +5,14 @@
     import { pb } from '../pb/pocketbase';
 
     export let id: string|null = null;
+    export let apiData: any = null;
+    export let foodType: string = 'basic';
+
     let name: string;
     let barcode: string;
     let image: string = '/imgs/placeholder.webp';
     let options: any = [];
+    
 
     let editingPicture: boolean = false;
     
@@ -16,7 +20,7 @@
     const dispatch = createEventDispatcher();
 
     function closed () {
-        dispatch('message', {action: 'closed'});
+        dispatch('close');
     }
 
     function removeOption(measure: string){
@@ -26,11 +30,24 @@
     async function getFood() {
         if (id){
             try {
-                const record = await pb.collection('foods_basic').getOne(id);
-                name = record.name;
-                barcode = record.barcode;
-                image = record.image;
-                options = (record.options) ? JSON.parse(record.options) : [];
+                let record;
+                switch (foodType) {
+                    case 'basic':
+                        record = await pb.collection('foods_basic').getOne(id);
+                        break;
+                    case 'branded':
+                        record = await pb.collection('foods_branded').getOne(id);
+                        break;
+                    default:
+                        console.log ('food record not found ' + id)
+                        return;
+                }
+                
+                name = record?.name;
+                barcode = record?.barcode;
+                image = record?.image;
+                options = (record?.options) ? JSON.parse(record.options) : [];
+
             } catch (e) {
                 console.log('could not get record: ' + id, e)
             }
@@ -47,17 +64,37 @@
 
         if (id){
             try{
-                const record = await pb.collection('foods_basic').update(id, data);
-                dispatch('message', {action: 'updated'});
+                let record;
+                switch(foodType) {
+                    case 'basic':
+                        record = await pb.collection('foods_basic').update(id, data);
+                        break;
+                    case 'branded':
+                        record = await pb.collection('foods_branded').update(id, data);
+                        break;
+                    default:
+                        return;
+                }
+                dispatch('update');
             } catch (e) {
                 console.log('could not update record: ' + id, e);
             }
         } else {
             try {
-                const record = await pb.collection('foods_basic').create(data);
+                let record;
+                switch(foodType) {
+                    case 'basic':
+                        record = await pb.collection('foods_basic').create(data);
+                        break;
+                    case 'branded':
+                        record = await pb.collection('foods_branded').create(data);
+                        break;
+                    default:
+                        return;
+                }
                 id = record.id;
                 console.log('created record: ' + id)
-                dispatch('message', {action: 'added'});
+                dispatch('create');
             } catch (e) {
                 console.log('could not create record', e);
             }
@@ -76,6 +113,23 @@
     onMount(async () => {
         if (id) {
             getFood();
+        } 
+        if (apiData) {
+            name = apiData.name;
+            barcode = apiData.barcode;
+            image = apiData.image;
+            console.log(JSON.parse(apiData.options))
+            JSON.parse(apiData.options).forEach((option: any) => {
+                options = [...options, {
+                    measure: option.measure,
+                    calories: option.calories,
+                    protein: option.protein,
+                    carbs: option.carbs,
+                    fat: option.fat,
+                    desc: option.desc,
+                    cost: 0
+                }]
+            })
         }
     })
 
@@ -110,22 +164,21 @@
 
     <div class="flex flex-col">
         {#each options as option} 
-        <div class="grid grid-cols-6 my-4 gap-4 text-center ">
-            <input type="text" placeholder="Measure" bind:value={option.measure} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Calories" bind:value={option.cal} on:change={() => {option.cal = calcInput(option.cal)}} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Cost" bind:value={option.cost}  on:change={() => {option.cost = calcInput(option.cost)}} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Proteins" bind:value={option.protein} on:change={() => {option.protein = calcInput(option.protein)}}  class="h-10 px-2 py-1">
-            <input type="text" placeholder="Fats" bind:value={option.fat}  on:change={() => {option.fat = calcInput(option.fat)}} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Carbs" bind:value={option.carb}  on:change={() => {option.carb = calcInput(option.carb)}} class="h-10 px-2 py-1">
-            <input type="text" placeholder="Description" bind:value={option.desc} class="h-10 px-2 py-1 col-span-5">
-            <button class="" type="button" on:click = {() => {removeOption(option.measure)}}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">
-                    <circle cx="12" cy="12" r="10" stroke="darkred" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7l10 10" />
-                </svg> 
-            </button>
-
-        </div>
+            <div class="grid grid-cols-6 my-4 gap-4 text-center ">
+                <input type="text" placeholder="Measure" bind:value={option.measure} class="h-10 px-2 py-1">
+                <input type="text" placeholder="Calories" bind:value={option.calories} on:change={() => {option.calories = calcInput(option.calories)}} class="h-10 px-2 py-1">
+                <input type="text" placeholder="Cost" bind:value={option.cost}  on:change={() => {option.cost = calcInput(option.cost)}} class="h-10 px-2 py-1">
+                <input type="text" placeholder="Proteins" bind:value={option.protein} on:change={() => {option.protein = calcInput(option.protein)}}  class="h-10 px-2 py-1">
+                <input type="text" placeholder="Fats" bind:value={option.fat}  on:change={() => {option.fat = calcInput(option.fat)}} class="h-10 px-2 py-1">
+                <input type="text" placeholder="Carbs" bind:value={option.carbs}  on:change={() => {option.carbs = calcInput(option.carbs)}} class="h-10 px-2 py-1">
+                <input type="text" placeholder="Description" bind:value={option.desc} class="h-10 px-2 py-1 col-span-5">
+                <button class="" type="button" on:click = {() => {removeOption(option.measure)}}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">
+                        <circle cx="12" cy="12" r="10" stroke="darkred" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7l10 10" />
+                    </svg> 
+                </button>
+            </div>
         {/each}
 
         <button on:click|preventDefault = {() => options = [...options, {}]} class="col-span-2 my-4 px-6 py-2 border border-purple-500 rounded-lg text-purple-500 font-semibold">New measure</button>

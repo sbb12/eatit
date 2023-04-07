@@ -9,7 +9,7 @@
     let measure = options[0].measure;
     let calories: number = 0;
 
-    $: calories =  Math.round(quantity * options.find((option: any) => option.measure === measure).cal);
+    $: calories =  Math.round(quantity * options.find((option: any) => option.measure === measure).calories);
 
     function addMeal() {
 
@@ -19,9 +19,9 @@
             id: food.id, 
             quantity: quantity, 
             measure: measure,
-            calories: quantity * option.cal,
+            calories: quantity * option.calories,
             protein: quantity * option.protein,
-            carbs: quantity * option.carb,
+            carbs: quantity * option.carbs,
             fat: quantity * option.fat,
             cost: quantity * option.cost,
             food:food

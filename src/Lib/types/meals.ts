@@ -3,7 +3,7 @@ interface Option{
     cost: number,
     protein: number,
     fat: number,
-    carb: number,
+    carbs: number,
 }
 
 export interface Meal {
