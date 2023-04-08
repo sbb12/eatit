@@ -1,6 +1,7 @@
 <script lang="ts">
 
     import { pb } from '../../pb/pocketbase';
+    import { onMount } from 'svelte';
     import { createEventDispatcher } from 'svelte';
     
     const dispatch = createEventDispatcher();
@@ -11,7 +12,7 @@
     let quantity: number = meal.quantity;
     let measure: string = meal.measure;
     let calories: number = meal.calories;    
-    let options = JSON.parse(food.options);
+    let options = food.options;
 
     function deleteEntry() {
         pb.collection('meal_entry').delete(id)
@@ -31,12 +32,13 @@
         dispatch('updateMeal', {id, quantity, measure, calories})
     }
 
-
-
+    onMount(() => {
+    })
+    
 </script>
 
 <div class="meal-entry grid grid-cols-8 w-full rounded-sm items-center">
-    <img src="{food.image}" alt='placeholder' class="col-span-1 p-1 w-[50px] h-[50px]"/>
+    <img src="{`https:/pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}?thumb=50x50`}" alt='placeholder' class="col-span-1 p-1 w-[50px] h-[50px]"/>
     <p class="font-semibold text-sm col-span-3 p-1 ">{meal.name}</p>  
     <input type="number" class="col-span-1 w-[40px] bg-gray-100 focus:outline-none" bind:value={quantity} on:input={updateMeal}/>
     <select class="col-span-1 m-[-1rem] bg-gray-100" bind:value={measure} on:change={updateMeal}>

@@ -19,10 +19,7 @@
     })
 
     async function startCam(){
-        const barcode = '4088600354842';
-        dispatch('scanned', barcode);
-        return;
-
+        
         cameraOverlayEl.classList.remove('hidden');
 
         navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}, audio: false})
@@ -38,11 +35,14 @@
     function stopCam(){
         status = 'stopped';
         cameraOverlayEl.classList.add('hidden');
-        vidEl.srcObject.getTracks().forEach(track => track.stop());
+        try {
+            vidEl.srcObject.getTracks().forEach(track => track.stop());
+        } catch {
+            console.log('no video stream to stop');
+        }
     }
 
     function onScan(barcode: string ){
-        console.log(barcode)
         stopCam();
         dispatch('scanned', barcode);
     }

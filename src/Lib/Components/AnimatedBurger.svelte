@@ -1,7 +1,11 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
+    const dispatch = createEventDispatcher();
+
     export let open = false;
     export let onClick = (): void => {
         open = !open;
+        dispatch('click')
     };
 
     export let ariaLabel = 'toggle menu'

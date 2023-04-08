@@ -7,7 +7,6 @@
 
     onMount(async () => {
         let records = await pb.collection('foods_basic').getFullList(200)         
-        console.log(records)
     })
 
 
@@ -15,6 +14,7 @@
 
 <h1>
     Secret Page
+    {$currentUser}
 </h1>
 
 <p>{msg}</p>

@@ -22,3 +22,13 @@
     }
     
 }
+
+
+@layer components {
+    .bg-camera {
+        background-image: url('https://eat.surgo.dev/imgs/camera.webp');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+    }
+}

@@ -7,6 +7,7 @@
     export let title: string = '';
     export let cost: number = 0;
     
+    let infoEl: HTMLDivElement;
     let chartEl: HTMLCanvasElement;
     let chart;
     
@@ -14,8 +15,10 @@
     
     //update chart with new data
     function updateChart() {
+      if (infoEl && (cost || values.reduce((a, b) => a + b, 0))){
+        infoEl.classList.remove('hidden')
+      }
       if (chart){
-        console.log(chart.config.data.datasets[0].data = values)
         chart.update();
       }
     }
@@ -64,7 +67,7 @@
     
   </script>
   
-  <div class=" h-[300px] w-[300px] top-0">
+  <div bind:this={infoEl} class="h-[300px] w-[300px] top-0 hidden">
     <canvas id="chart" bind:this={chartEl}></canvas>
 
     <grid class="grid grid-cols-2 mx-auto">

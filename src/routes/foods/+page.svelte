@@ -1,11 +1,14 @@
 <script lang="ts">
     import { pb } from "../../lib/pb/pocketbase";
     import FoodEdit from "../../lib/components/FoodEdit.svelte";
+	import { onMount } from "svelte";
     
     let searchInput: string = '';
     let foods: any[] = [];
     let editId: string|null = null;
     let editing: boolean = false;
+    
+    let imgURL = '';
 
     $: {searchInput, searchFoods()}
 
@@ -15,7 +18,7 @@
             return;
         } 
         try {
-            const results = await pb.collection('foods_basic').getList(1, 15, {
+            const results = await pb.collection('foods').getList(1, 15, {
                 filter: 'name ~ "' + searchInput + '"',
                 sort: 'created'
             })
@@ -40,21 +43,24 @@
         editId = null;
     }
 
+    onMount(async ()=>{
+        
+    })
+
 </script>
 
 
-<main class="mx-auto w-[550px] flex flex-col my-4 relative">
+<main class="mx-auto max-w-[500px] flex flex-col my-4 relative">
+
     {#if editing}
-        <div class="absolute top-0">
             <FoodEdit id={editId} on:close={handleClose} on:update={handleUpdate} on:create={handleCreate}/>
-        </div>
     {:else}
         <input type="text" bind:value={searchInput} placeholder="Search by name" class="w-full shadow appearance-none border rounded py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         
         <ul class="my-4 w-full">
             {#each foods as food}
             <li class="">
-                <img src="{food.image}" alt="{food.name}">
+                <img src="{`https:/pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}">
                 <p>
                     {food.name}
                 </p>

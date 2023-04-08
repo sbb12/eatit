@@ -1,12 +1,18 @@
-<script>
-    // import DayTracker from '../lib/components/tracker/DayTracker.svelte';
-    import DayTracker from '../lib/components/tracker/DayTracker.svelte';
+<script lang="ts">
+    import { currentUser, pb } from "../lib/pb/pocketbase";
+    import { redirect } from "@sveltejs/kit";
+    import { onMount } from "svelte";
+    import Login from "../lib/components/Login.svelte";
 
-    const now = new Date();
-
+    if ($currentUser){
+        window.location.href = '/track'
+    }
 </script>
 
-<div class="flex justify-center items-center flex-col lg:flex-row mx-auto">
-    <DayTracker date ={now}/>
-</div>
+{#if !$currentUser}
+    <Login />
+{/if}
+
+
+
 

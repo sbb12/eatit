@@ -6,6 +6,8 @@
     import Weight from './Weight.svelte';
     import NutritionPie from './NutritionPie.svelte';
 
+    let dayID = '';
+    
     let weight: number|null = null;
     let calGoal: number;
     let calConsumed: number = 0;
@@ -50,36 +52,43 @@
 
     onMount( async () => {
         // fetch user data to get calorie goal
-        const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
-        calGoal = record.cal_goal;
 
-        // get day entry
-        const day_resp = await pb.collection('day_track').getList(1, 50, {
-            filter: `user.id = "${$currentUser?.id}" && date ~ "${dateString}%"`,
-        })
+        const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
+        calGoal = record.calorie_goal;
         
-        // if no entry, create one
-        if (day_resp.items.length === 0) {
-            const newEntry = await pb.collection('day_track').create({
-                user: $currentUser?.id,
-                date: date.toISOString(),
-                goal: calGoal,
-                weight: null,
+        // get day entry
+        let entry;
+        try{
+            const day_resp = await pb.collection('day_track').getFirstListItem('',{
+                filter: `user.id = '${$currentUser?.id}' && date ~ '${dateString}%'`,
             })
-            entry = newEntry;
-        } else {
-            entry = day_resp.items[0];
+            entry = day_resp;            
+        } catch (e) {
+            if (e.data.code == 404){
+                try{
+                    const newEntry = await pb.collection('day_track').create({
+                        user: $currentUser?.id,
+                        date: date.toISOString(),
+                        goal: calGoal,
+                        weight: null,
+                    })
+                    entry = newEntry;
+                } catch (er){
+                    console.log(er)
+                }
+            }
         }
-        // set weight
         weight = entry.weight;
+        dayID = entry.id;
 
 
         // get meals for this day
         let meals_resp = await pb.collection('meal_entry').getList(1, 50, {
             filter: 'day.id = "' + entry.id + '"',
-            expand: 'food_id',
+            expand: 'food',
             sort: 'created'
         })
+
         meals = meals_resp.items.map((m) => {
             return {
                 id: m.id,
@@ -91,7 +100,7 @@
                 carbs: m.carbs,
                 fat: m.fat,
                 cost: m.cost,
-                food: m.expand.food_id,
+                food: m.expand.food,
             }
         });
 
@@ -102,7 +111,6 @@
     }
 
     function addMeal(event: any){
-        console.log('addmeal', event.detail)
 
         const meal = {
             id: event.detail.entry.id,
@@ -148,7 +156,7 @@
 </script>
 
 
-<div class="trackbox bg-gray-100 m-2 py-8 px-6  w-[550px] max-w-full">
+<div class="trackbox bg-gray-100 m-2 py-8 px-6 w-full max-w-[500px]">
     
     <div class="headers flex flex-row justify-between ">
         <div class="flex flex-col">
@@ -174,8 +182,9 @@
                     <p>{dateStr()}</p>
                 </div>
             </div>
-
-            <Weight id={entry?.id} weight={entry?.weight}/>
+            {#if dayID}
+                <Weight id={dayID} {weight}/>
+            {/if}
         </div>
     </div>
 
@@ -184,8 +193,9 @@
             <MealEntry meal={meal} on:removeMeal={removeMeal} on:updateMeal={updateMeal}/>
         {/each}
     </div>
-    
-    <NewMeal dayID = {entry?.id} on:addMeal={addMeal}/>
+    {#if dayID}
+        <NewMeal dayID = {dayID} on:addMeal={addMeal}/>
+    {/if}
 </div>
 
 <NutritionPie labels={['protein', 'carbs', 'fat']} values={[protein, carbs, fat]} {cost} />

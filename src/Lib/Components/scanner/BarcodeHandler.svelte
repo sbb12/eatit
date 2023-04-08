@@ -13,33 +13,30 @@
 
     async function onScan(event: CustomEvent<{barcode: string}>){
         const barcode = event.detail
-        console.log('scanned code: ' + barcode);
+        
+        msg = 'found barcode: ' + barcode + ' searching...';
 
         // check if we have it in our db
         try{ 
-            const record = await pb.collection('foods_branded').getFirstListItem(`barcode = "${barcode}"`);
+            const record = await pb.collection('foods').getFirstListItem(`barcode = "${barcode}"`);
             if (record) {
                 
-                let option = JSON.parse(food.options)[0];
+                let option = record.options[0];
                 
                 const data = {
-                name: record.name,
-                food_id: record.id,
-                quantity: 1,
-                measure: option.measure,
-                calories: option.calories,    
-                protein: option.protein,
-                carbs: option.carbs,
-                fat: option.fat,
-                cost: option.cost,
-                food:  {
-                    id: record.id,
-                    image: record.image,
                     name: record.name,
-                    options: record.options
-                    }
+                    food_id: record.id,
+                    quantity: 1,
+                    measure: option.measure,
+                    calories: option.calories,    
+                    protein: option.protein,
+                    carbs: option.carbs,
+                    fat: option.fat,
+                    cost: option.cost,
+                    food:  record
                 }   
-                dispatch('addFood', record);
+                dispatch('addFood', data);
+                msg = '';
             }
         }
         catch { // food not in database, we need toprompt user to add it
@@ -69,7 +66,10 @@
             return;
         }
 
+        msg = 'Product found, parsing...'
+
         const servings = []
+
         // check for serving sizes
         if (data.product.nutriments['energy-kcal_serving']) {
             servings.push({
@@ -89,16 +89,6 @@
                 carbs: data.product.nutriments.prepared_carbohydrates_serving,
                 fat: data.product.nutriments.prepared_fat_serving,
                 desc:  data.product.prepared_serving_size ? data.product.serving_size :  Math.round(100 * parseInt(data.product.nutriments['energy-kcal_prepared_serving']) / parseInt(data.product.nutriments['energy-kcal_100g']))                    
-            })
-        }
-        if (data.product.nutriments['energy-kcal_100g']) {
-            servings.push({
-                measure: 'g',
-                calories: data.product.nutriments['energy-kcal_100g'] / 100,
-                protein: data.product.nutriments.proteins_100g / 100,
-                carbs: data.product.nutriments.carbohydrates_100g / 100,
-                fat: data.product.nutriments.fat_100g / 100,
-                desc: ''                  
             })
         }
         if (data.product.nutriments['energy-kcal_100g']) {
@@ -135,7 +125,29 @@
             console.log('added food to database');
         } else if (event.detail.action === 'closed') {
             promptAdd = false;
+            msg = '';
         }
+    }
+
+    function addEntry(event: CustomEvent){
+        console.log('add entry', event.detail)
+        
+        const data = {
+            name: event.detail.name,
+            food_id: event.detail.id,
+            quantity: 1,
+            measure: event.detail.options[0].measure,
+            calories: event.detail.options[0].calories,
+            protein: event.detail.options[0].protein,
+            carbs: event.detail.options[0].carbs,
+            fat: event.detail.options[0].fat,
+            cost: event.detail.options[0].cost,
+            food: event.detail
+        }
+
+        dispatch('addFood', data);
+        promptAdd = false;
+        msg = '';
     }
 
 
@@ -147,8 +159,18 @@
 
 
 <BarcodeScanner on:scanned={onScan}/>
+{#if msg}
+    <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-20 bg-black "></overlay>
+    <div class="absolute top-0 left-0 p-1 w-full h-full flex justify-center items-center">
+        {msg}
+    </div>
+{/if}
 
 {#if promptAdd}
-    <FoodEdit {apiData} on:save={onSave}/>
+    <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-80 bg-black "></overlay>
+    <div class="absolute top-0 left-0 p-1 w-full h-full flex justify-center items-center">
+        {msg}
+        <FoodEdit {apiData} on:create={addEntry} on:save={onSave} on:close={() => {promptAdd = false; msg=''}}/>
+    </div>
 {/if}
 

@@ -27,18 +27,11 @@
         } 
         foods = [];
         try {
-            const results = await pb.collection('foods_basic').getList(1, 15, {
+            const results = await pb.collection('foods').getList(1, 15, {
                 filter: 'name ~ "' + name + '"',
                 sort: 'created'
             })
-            foods = results.items.map((food) => {
-                return {
-                    id: food.id,
-                    image: food.image,
-                    name: food.name,
-                    options: food.options
-                }
-            });
+            foods = results.items
         } catch (error) {
             console.log(error)
         }
@@ -87,25 +80,28 @@
     }
 
     async function addMeal(event: any) {
-        console.log('newmeal', event.detail)
 
         const data = {
+            day: dayID,
             name: event.detail.name,
-            food_id: event.detail.id,
+            food: event.detail.food_id,
             quantity: event.detail.quantity,
             measure: event.detail.measure,
             calories: Math.round(event.detail.calories),    
             protein: Math.round(event.detail.protein),
             carbs: Math.round(event.detail.carbs),
             fat: Math.round(event.detail.fat),
-            cost: parseFloat(event.detail.cost.toFixed(2)),
-            day: dayID
+            cost: parseFloat(event.detail.cost).toFixed(2),
         }
 
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
             name = '';
             adding = false;
+
+            console.log(event.detail.food)
+            
+            
             dispatch('addMeal', {
                 entry: newEntry,
                 food: event.detail.food
@@ -125,7 +121,6 @@
     }
 
 </script>
-
 
 <div class="flex w-full justify-center" bind:this={addEl}>
     {#if !adding}
@@ -183,7 +178,7 @@
                     {/if}
                 </form>
             {:else if addType = "scan"}
-                <BarcodeHandler {dayID}/>
+                <BarcodeHandler {dayID} on:addFood={addMeal}/>
             {/if}
         </div>
     </div>
