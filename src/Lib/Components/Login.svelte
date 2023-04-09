@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { pb } from "../pb/pocketbase";
+    import LoadingRings from "./LoadingRings.svelte";
 
     let emailEl: HTMLInputElement;
     let pwEl: HTMLInputElement;
@@ -125,7 +126,7 @@
         <button on:click={login} class="inline-flex justify-center relative px-6 py-2.5 text-white bg-green-500 font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg transition duration-150 ease-in-out w-full mb-3">
             Login 
             {#if loggingIn}
-                <span class="absolute lds-dual-ring"></span>
+                <LoadingRings/>
             {/if}
         </button>
         <button on:click={signup} 
@@ -134,7 +135,7 @@
         >
             Sign up
             {#if signingUp}
-                <span class="absolute lds-dual-ring"></span>
+                <LoadingRings/>
             {/if}
         </button>
         
@@ -147,35 +148,3 @@
         {/if}
     </form>
 </main>
-
-<style>
-    .lds-dual-ring {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        margin-left: 80px;
-        margin-top: -2px;
-    }
-
-    .lds-dual-ring:after {
-        content: " ";
-        display: block;
-        width: 20px;
-        height: 20px;
-        margin: 0;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        border-color: #fff transparent #fff transparent;
-        animation: lds-dual-ring 1.2s linear infinite;
-    }
-
-    @keyframes lds-dual-ring {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-</style>

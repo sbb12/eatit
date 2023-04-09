@@ -60,7 +60,7 @@
         <ul class="my-4 w-full">
             {#each foods as food}
             <li class="">
-                <img src="{`https:/pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}">
+                <img src="{`https://pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}">
                 <p>
                     {food.name}
                 </p>

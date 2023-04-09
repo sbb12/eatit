@@ -19,10 +19,19 @@
     })
 
     async function startCam(){
+        const code = '4088600437996'
+        onScan(code);
+        return;
         
         cameraOverlayEl.classList.remove('hidden');
 
-        navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}, audio: false})
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment",
+                // width: 250,
+                // height: 250
+            }, 
+            audio: false})
         .then((stream) => {
             mediaStream = stream;
             vidEl.srcObject = mediaStream;
@@ -80,19 +89,18 @@
     </button>
 </div>
 
-{err} <br>
-{status}
+{#if err}
+    <p>{err}</p>
+{/if}
 
-<div bind:this={cameraOverlayEl} class="hidden fixed top-0 left-0 z-50 w-full h-full bg-gray-200">
-    <button class="absolute top-0 right-0 m-4 text-red" on:click={stopCam}>❌</button>
-    <video bind:this={vidEl} autoplay></video>
-    <div>
-        <button on:click={stopCam} class=" border-teal-300 border-solid">Stop</button>
+<div bind:this={cameraOverlayEl} class="hidden fixed top-0 left-0 z-50 w-full h-full bg-gray-200 ">
+    <button class="absolute top-3 right-3 p-4 text-red z-[60]" on:click={stopCam}>❌</button>
+    <div class="p-4">
+        <video bind:this={vidEl} autoplay class="w-full border-2 border-teal-800"></video>
     </div>
-    <div>
-        {err} <br>
-        {status} <br>
-        {code}
+    <div class="w-full flex flex-col items-center">
+        <p class="text-teal-800">{status}</p>
+        <button on:click={stopCam} class="px-4 py-2 border-4 rounded-lg border-red-800 border-solid">Stop</button>
     </div>
 </div>
 

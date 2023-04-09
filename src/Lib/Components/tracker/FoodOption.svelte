@@ -3,7 +3,7 @@
     const dispatch = createEventDispatcher();
 
     export let food: any;
-    const image = `https:/pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}`
+    const image = `https://pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}`
 
     let quantity: number = 1;
     let options = food.options;

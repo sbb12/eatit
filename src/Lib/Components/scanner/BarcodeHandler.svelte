@@ -168,8 +168,8 @@
 
 {#if promptAdd}
     <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-80 bg-black "></overlay>
-    <div class="absolute top-0 left-0 p-1 w-full h-full flex justify-center items-center">
-        {msg}
+    <div class="absolute top-0 left-0 p-1 w-full h-full flex flex-col justify-center items-center">
+        <p class="">{msg}</p>
         <FoodEdit {apiData} on:create={addEntry} on:save={onSave} on:close={() => {promptAdd = false; msg=''}}/>
     </div>
 {/if}

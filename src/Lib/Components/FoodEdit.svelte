@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
     import { createEventDispatcher } from 'svelte';
+    import CompressionSvg from './CompressionSvg.svelte';
 
     import { pb } from '../pb/pocketbase';
 
@@ -12,8 +13,8 @@
     let image = null;
     let imageUrl: string = '';
     let imageChange: boolean = false;
+    let processingPicture: boolean = false;
     let options: any = [];
-    
 
     let editingPicture: boolean = false;
     let imgInputEl: HTMLInputElement;
@@ -21,7 +22,6 @@
     let imgEl: HTMLImageElement;
 
     const dispatch = createEventDispatcher();
-
 
     onMount(async () => {
         if (id) {
@@ -46,13 +46,16 @@
         image = ''
     })
 
+
     function closed () {
         dispatch('close');
     }
 
+
     function removeOption(measure: string){
         options = options.filter((option: any) => option.measure !== measure);
     }
+
 
     async function getFood() {
         if (id){
@@ -60,13 +63,14 @@
                 const record = await pb.collection('foods').getOne(id);
                 name = record?.name;
                 barcode = record?.barcode;
-                imageUrl = `https:/pb.surgo.dev/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`
+                imageUrl = `https://pb.surgo.dev/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`
                 options = record?.options;
             } catch (e) {
                 console.log('could not get record: ' + id, e)
             }
         }
     }
+
 
     function moveOptionTop(i:number){
         if (i > 0){
@@ -76,12 +80,15 @@
         }
     }
 
+
     async function handleSubmit() {
 
+        // check for name and options and image
         if (!name || options.length < 1 || (imageChange && !imgInputEl.files[0])) {
             return;
         }
 
+        // create formdata
         let formData = new FormData();
         formData.append('name', name);
         formData.append('options', JSON.stringify(options))
@@ -94,22 +101,20 @@
             formData.append('type', 'basic')
         }
         
+        // add image if changed or added
         if (imageChange){
-            formData.append('image', imgInputEl.files[0]);
+            formData.append('image', image);
         }
 
-        // console.log('formdata', formData.getAll())
-        // return;
-
-        // update if id exists else create
-        if (id){
+                if (id){ // update
             try{
                 const record = await pb.collection('foods').update(id, formData);
                 dispatch('update', record);
             } catch (e) {
                 console.log('could not update record: ' + id, e);
             }
-        } else {
+        } else { // create
+            
             // check for image
             if (!image){ 
                 handleNoImageCreateError();
@@ -125,6 +130,12 @@
         }
     }
 
+
+    /**
+     * evals a string if it starts with an equal sign and ends with a semicolon.
+     * @param {string} inputString - The input string to be evaluated.
+     * @returns {string} - The evaluated string.
+     */
     function calcInput(inputString: string) {
         if (inputString.match(/^=.+;/)){
             return eval(inputString.replace(/^=/, '').replace(/;$/, ''));
@@ -133,26 +144,52 @@
         }
     }
 
+
+    // runs when the image preview is clicked
     function onImageClick(){
         imgInputEl.click()
     }
 
-    function onImageChange(e){
-        imageChange = true;
-        image = e.target.files[0];
 
-        const file = e.target.files[0];
+    /**
+     * Handles the image input change event.
+     * @async
+     * @param {Event} e - The event object.
+     * @returns {void}
+     */
+    async function onImageChange(e){
+        // set flags
+        imageChange = true;
+        processingPicture = true;
         
-        if (file) {
+        // grab the image file
+        const file = e.target.files[0];
+
+        try {
+            // compress the image
+            const newImglob = await compressImage(file);
+            image = newImglob;
+        } catch (e) {
+            console.log('could not compress image', e);
+        }
+
+        // set the image preview
+        if (image) {
             const reader = new FileReader();
+            reader.readAsDataURL(image);
             reader.onload = function(e) {
                 imgEl.src = e.target.result;
             }
-            reader.readAsDataURL(file);
         }
 
+        // reset flags
+        processingPicture = false;
     }
 
+    /**
+     * Handles the error when a user tries to create a food without an image.
+     * @returns {void}
+     */
     function handleNoImageCreateError(){
         console.log('no image')
         imgPreviewEl.classList.add('border-red-500');
@@ -165,6 +202,74 @@
                 }, 1000);
             }, 300);
         }, 300);
+    }
+
+    
+    /**
+     * Compresses, and resizes an image file, and returns the compressed image as a Blob.*
+     * @async
+     * @param {File} imgFile - The image file to be compressed and resized.
+     * @param {number} [size=400] - The size of the output image's longer side (width or height).
+     * @param {number} [quality=0.8] - number between 0 and 1 indicating compression quality
+     * @returns {Promise<Blob|boolean>} A Promise that resolves with the compressed image Blob, or rejects with `false` if an error occurs during compression.
+     */
+    async function compressImage(imgFile, size = 800, quality = 0.9) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(imgFile);
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+
+                    img.onload = async () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = size;
+                        canvas.height = size;
+
+                        // resize and crop image to square at center
+                        const ratio = img.width > img.height ? img.height / size : img.width / size;
+                        const dx = img.width > img.height ? ((img.width / ratio) - size) / 2 : 0;
+                        const dy = img.width > img.height ? 0 : ((img.height / ratio) - size) / 2;
+
+                        ctx.drawImage(img, -dx, -dy, img.width / ratio , img.height / ratio);
+
+                        try {
+                            const newblob = await canvasToBlob(canvas, 'image/webp', quality);
+                            resolve(newblob);
+                        } catch (e) {
+                            console.log('could not compress image', e);
+                            reject(e);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('could not compress image', e);
+                reject(e);
+            }
+        });
+    }
+
+
+    /**
+     * Converts a canvas element to a Blob.
+     * @async
+     * @param {HTMLCanvasElement} canvas - The canvas element to be converted.
+     * @param {string} [mimeType='image/webp'] - The MIME type of the image format to use for the output image.
+     * @param {number} [quality=0.8] - number between 0 and 1 indicating compression quality
+     * @returns {Promise<Blob>} A Promise that resolves with the canvas Blob, or rejects with an error if an error occurs during conversion.
+     */
+    function canvasToBlob(canvas, mimeType = 'image/webp', quality = 0.9) {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Failed to create a blob from the canvas.'));
+                }
+            }, mimeType, quality);
+        });
     }
 
 </script>
@@ -186,6 +291,9 @@
         <input bind:this={imgInputEl} on:change={onImageChange} type="file" accept="image/jpg, image/png, image/jpeg, image/webp" class="hidden">
         <div bind:this={imgPreviewEl} on:click={onImageClick} class="border-2 border-gray-400 border-dotted rounded w-[120px] h-[120px] flex items-center justify-center align-middle { image || imageUrl ? '' : 'bg-camera'}" on:keydown>
             <img bind:this={imgEl} src="{imageUrl}" class="{ image || imageUrl ? '' : 'hidden'}">
+            {#if processingPicture}
+                <CompressionSvg />
+            {/if}
         </div>
 
         <div class="flex flex-col mt-6">
@@ -196,8 +304,8 @@
 
     <div class="flex flex-col">
         {#each options as option, i} 
-            <div class="grid grid-cols-6 my-4 gap-2 text-center border rounded-sm relative">
-                <div class="absolute ml-[-21px] top-[35%] opacity-20 hover:opacity-100" title="move to top and make default choice" on:click={()=>{moveOptionTop(i)}} on:keypress>
+            <div class="grid grid-cols-6 my-4 gap-2 text-center border rounded-sm relative" id="option-{i}" draggable="true">
+                <div class="absolute ml-[-21px] top-[35%] opacity-20 hover:opacity-100" title="move to top and make default choice" on:click={()=>{moveOptionTop(i)}} on:keypress draggable>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
                     </svg>
@@ -228,6 +336,10 @@
     </div>
 </form>
 
+<!-- <canvas id="canvas" width="200" height="200"></canvas> -->
+<div class="mx-auto my-20">
+    
+</div>
 
 
 <style lang="scss">

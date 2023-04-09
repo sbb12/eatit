@@ -52,9 +52,14 @@
 
     onMount( async () => {
         // fetch user data to get calorie goal
+        try {
+            const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
+            calGoal = record.calorie_goal;
+        } catch (e) {
+            pb.authStore.clear()
+            window.location.href = '/'
 
-        const record = await pb.collection('users').getOne(`${$currentUser?.id}`, {});
-        calGoal = record.calorie_goal;
+        }
         
         // get day entry
         let entry;
