@@ -5,6 +5,8 @@
 
     const dispatch = createEventDispatcher();
 
+    export let startDefault = false;
+
     let cameraOverlayEl: HTMLElement;
     let vidEl: HTMLVideoElement;
     let mediaStream;
@@ -14,15 +16,21 @@
     let status = '';
     let code = '';
 
+    onMount(() => {
+        if (startDefault){
+            startCam();
+        }
+    })
+
     onDestroy(() => {
         stopCam();
     })
 
     async function startCam(){
-        const code = '4088600437996'
-        onScan(code);
-        return;
-        
+        // const barcode = '4088600057712'
+        // onScan(barcode);
+        // return;
+        status = 'Starting camera';
         cameraOverlayEl.classList.remove('hidden');
 
         navigator.mediaDevices.getUserMedia({
@@ -61,7 +69,6 @@
             status = 'scanning'
             barcodeDetector.detect(vidEl)
             .then(barcodes => {
-                err = 'found barcodes ' + barcodes.length
                 if (barcodes.length > 0) {
                     onScan(barcodes[0].rawValue)
                     return;
@@ -93,7 +100,7 @@
     <p>{err}</p>
 {/if}
 
-<div bind:this={cameraOverlayEl} class="hidden fixed top-0 left-0 z-50 w-full h-full bg-gray-200 ">
+<div bind:this={cameraOverlayEl} class="hidden fixed top-0 left-0 z-[101] w-full h-full bg-gray-200 ">
     <button class="absolute top-3 right-3 p-4 text-red z-[60]" on:click={stopCam}>❌</button>
     <div class="p-4">
         <video bind:this={vidEl} autoplay class="w-full border-2 border-teal-800"></video>

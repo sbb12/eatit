@@ -14,7 +14,7 @@
     let addType: string = 'db';
 
     let quickName: string = '';
-    let quickQuantity: number;
+    let quickQuantity: number|null;
 
     $: {name, searchFoods()}
 
@@ -39,7 +39,7 @@
 
     async function getFood(id: string){
         try{
-            const food = await pb.collection('foods_basic').getOne(id, {});
+            const food = await pb.collection('foods').getOne(id, {});
             return food;
         } catch (error) {
             console.log(error)
@@ -49,26 +49,29 @@
 
     async function quickAdd(){
 
-        const food = await getFood('3lp4ntv6p0efkmn'); // id of basic food
+        const food = await getFood('448ohrs7rgvbxak'); // id of basic food
         if (!food) {
             console.log("couldn't fetch quick cal food data")
             return;
         }
 
         const data = {
+            day: dayID,
             name: quickName,
-            food_id: '3lp4ntv6p0efkmn',
+            food: '448ohrs7rgvbxak',
             quantity: quickQuantity,
             measure: 'cal',
-            calories: Math.round(quickQuantity * JSON.parse(food.options)[0].calories),
-            day: dayID
+            calories: quickQuantity,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            cost: 0,
         }
 
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
-            name = '';
-            quickName = '';
-            adding = false;
+            resetOptions()           
+
             dispatch('addMeal', {
                 entry: newEntry,
                 food: food
@@ -96,11 +99,7 @@
 
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
-            name = '';
-            adding = false;
-
-            console.log(event.detail.food)
-            
+            resetOptions()
             
             dispatch('addMeal', {
                 entry: newEntry,
@@ -118,6 +117,14 @@
             el.classList.remove('selected');
         })
         document.querySelector(`button#${type}`)?.classList.add('selected');
+    }
+
+    function resetOptions(){
+        name = '';
+        quickName = '';
+        quickQuantity = null;
+        adding = false
+        addType = 'db';
     }
 
 </script>
@@ -178,7 +185,13 @@
                     {/if}
                 </form>
             {:else if addType = "scan"}
-                <BarcodeHandler {dayID} on:addFood={addMeal}/>
+                <div class="mx-auto p-3">
+                    {#if 'BarcodeDetector' in window}
+                        <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal}/>
+                    {:else}
+                        <p class="">Barcode scanning is not supported on your device</p>
+                    {/if}
+                </div>
             {/if}
         </div>
     </div>

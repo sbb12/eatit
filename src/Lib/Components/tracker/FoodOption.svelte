@@ -25,6 +25,7 @@
             carbs: quantity * option.carbs,
             fat: quantity * option.fat,
             cost: quantity * option.cost,
+            food: food
         })    
     }
 

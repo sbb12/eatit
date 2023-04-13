@@ -1,15 +1,17 @@
-interface Option{
+export interface OptionType{
     measure: string,
-    cost: number,
+    calories: number,
     protein: number,
+    cost: number,
     fat: number,
     carbs: number,
+    desc: string,
 }
 
-export interface Meal {
+export interface Food {
     id: string,
     name: string,
     barcode: string,
     image: string,
-    options: Option[],
+    options: OptionType[],
 }

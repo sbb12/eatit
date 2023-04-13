@@ -9,16 +9,18 @@
     
     let infoEl: HTMLDivElement;
     let chartEl: HTMLCanvasElement;
-    let chart;
+    let chart: Chart;
     
     $: {values; updateChart()};
     
     //update chart with new data
     function updateChart() {
-      if (infoEl && (cost || values.reduce((a, b) => a + b, 0))){
+      if (infoEl && (cost > 0 || values.reduce((a, b) => a + b, 0))){
         infoEl.classList.remove('hidden')
       }
       if (chart){
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = values;
         chart.update();
       }
     }
@@ -62,6 +64,8 @@
           }
         }
       });
+
+      updateChart();
     });
   
     

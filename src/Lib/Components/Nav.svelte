@@ -22,7 +22,9 @@
 
 <nav class="flex w-full justify-between bg-slate-200">
     <div class="text-2xl font-bold p-4">
-        EatIt
+        <a href="/">
+            EatIt
+        </a>
     </div>    
     {#if $currentUser}
         {#if innerWidth >= 768}
@@ -39,13 +41,13 @@
                 <a href="/" on:click={logout}>Logout</a>
             </div>
         {:else}
-            <div class="z-50">
+            <div class="z-[100]">
                 <AnimatedBurger {open} on:click={onClick}/>
             </div>
             {#if open}
-                <overlay class="fixed top-0 left-0 w-full h-full z-30 backdrop-blur-lg bg-black opacity-50"></overlay>
+                <overlay class="fixed top-0 left-0 w-full h-full z-[80] backdrop-blur-lg bg-black opacity-50"></overlay>
             {/if}
-            <ul bind:this={mobileMenuEl} class="fixed top-0 right-0 z-40 flex flex-col items-center bg-slate-300 closed">
+            <ul bind:this={mobileMenuEl} class="fixed top-0 right-0 z-[90] flex flex-col items-center bg-slate-300 closed">
                 <li class="py-5 px-20"><a href="/track" on:click={onClick}>Track</a></li>
                 <!-- <li><a href="/meals" on:click={onClick}>Meals</a></li> -->
                 <li class="py-5 px-20"><a href="/foods"  on:click={onClick}>Foods</a></li>

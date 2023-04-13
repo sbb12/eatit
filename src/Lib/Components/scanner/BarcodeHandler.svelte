@@ -1,15 +1,21 @@
 <script lang="ts">
 
     import { currentUser, pb } from '../../pb/pocketbase';
-    import { createEventDispatcher } from 'svelte';   
+    import { createEventDispatcher, onMount } from 'svelte';   
 	import BarcodeScanner from './BarcodeScanner.svelte';
-	import FoodEdit from '../FoodEdit.svelte';
+	import FoodEdit from '../foodEdit/FoodEdit.svelte';
+
+    export let startDefault = false;
 
     const dispatch = createEventDispatcher();
-    export let dayID: string;
+    let browserSupported = false;
     let msg: string = '';
     let promptAdd = false;
     let apiData;
+
+    onMount(async () => {
+        browserSupported = 'BarcodeDetector' in window
+    });
 
     async function onScan(event: CustomEvent<{barcode: string}>){
         const barcode = event.detail
@@ -25,6 +31,7 @@
                 
                 const data = {
                     name: record.name,
+                    brands: record.brands,
                     food_id: record.id,
                     quantity: 1,
                     measure: option.measure,
@@ -35,7 +42,7 @@
                     cost: option.cost,
                     food:  record
                 }   
-                dispatch('addFood', data);
+                dispatch('foundFood', data);
                 msg = '';
             }
         }
@@ -106,10 +113,10 @@
         const product = {
             name: data.product.product_name,
             barcode: data.product.code,
-            image: data.product.image_url,
+            brands: data.product.brands_tags ? data.product.brands_tags?.join(', ') : data.product.brands ? data.product.brands : '',
+            image_url: data.product.image_url,
             options: JSON.stringify(servings)
         }
-
         msg = 'Product found online, add to database?'
         promptProductEntry(product);
 
@@ -158,19 +165,26 @@
 
 
 
-<BarcodeScanner on:scanned={onScan}/>
-{#if msg}
-    <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-20 bg-black "></overlay>
-    <div class="absolute top-0 left-0 p-1 w-full h-full flex justify-center items-center">
-        {msg}
+{#if !browserSupported}
+    <div class="mx-auto">
+        <p class="text-center">Your browser does not support the barcode scanner</p>
     </div>
+{:else}
+    <BarcodeScanner on:scanned={onScan} {startDefault}/>
+    {#if msg}
+        <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-20 bg-black "></overlay>
+        <div class="absolute top-0 left-0 p-1 w-full h-full flex justify-center items-center">
+            {msg}
+        </div>
+    {/if}
+
+    {#if promptAdd}
+        <overlay class="fixed top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-80 bg-black "></overlay>
+        <div class="fixed top-0 left-0 z-50 p-1 w-full h-full flex flex-col justify-center items-center">
+            <p class="">{msg}</p>
+            <FoodEdit {apiData} on:create={addEntry} on:save={onSave} on:close={() => {promptAdd = false; msg=''}}/>
+        </div>
+    {/if}
 {/if}
 
-{#if promptAdd}
-    <overlay class="absolute top-0 left-0 z-40 w-full h-full backdrop-blur-lg opacity-80 bg-black "></overlay>
-    <div class="absolute top-0 left-0 p-1 w-full h-full flex flex-col justify-center items-center">
-        <p class="">{msg}</p>
-        <FoodEdit {apiData} on:create={addEntry} on:save={onSave} on:close={() => {promptAdd = false; msg=''}}/>
-    </div>
-{/if}
 
