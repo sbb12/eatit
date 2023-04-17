@@ -26,7 +26,6 @@
 
         try {
             await pb.collection('users').authWithPassword(email, password);
-            console.log('logged in')
             loggingIn = false;
             window.location.href = '/track'
         } catch (error) {

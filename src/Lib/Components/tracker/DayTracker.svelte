@@ -1,12 +1,14 @@
 <script lang='ts'>
-	import { currentUser, pb } from '../../pb/pocketbase';
     import { onMount } from 'svelte';
+    import { Datepicker } from 'svelte-calendar';
+	import { currentUser, pb } from '../../pb/pocketbase';
     import MealEntry from './MealEntry.svelte';
     import NewMeal from './NewMeal.svelte';
     import Weight from './Weight.svelte';
     import NutritionPie from './NutritionPie.svelte';
 
     let dayID = '';
+    
     
     let weight: number|null = null;
     let calGoal: number;
@@ -24,9 +26,10 @@
     if (!date) {
         date = new Date();
     }
-    const dateString: string = date.toISOString().split('T')[0];
+    let selected = date;
+    let previousSelected;
+    $:selected && (selected != previousSelected) && loadDay(selected);
 
-    let entry: any;
     let meals: any[] = [];
 
     $: {meals, mealCalc()}
@@ -46,7 +49,7 @@
             cost += parseFloat(meal.cost);
         })
 
-        cost = cost.toFixed(2);
+        cost = Number(cost.toFixed(2));
         calLeft = calGoal - calConsumed;
     }
 
@@ -58,38 +61,46 @@
         } catch (e) {
             pb.authStore.clear()
             window.location.href = '/'
-
         }
+
+    })
+
+    async function getDayEntry(selectedDate: Date){
+
+        // fix timezone 
+        const offset = selectedDate.getTimezoneOffset();
+        selectedDate.setMinutes(selectedDate.getMinutes() - offset);
+        const dateString: string = selectedDate.toISOString().split('T')[0];
         
-        // get day entry
-        let entry;
-        try{
+        try{  // fetch day if it exists
             const day_resp = await pb.collection('day_track').getFirstListItem('',{
                 filter: `user.id = '${$currentUser?.id}' && date ~ '${dateString}%'`,
             })
-            entry = day_resp;            
-        } catch (e) {
+            dayID = day_resp.id;
+            return day_resp;            
+        } catch (e) { // create day entry 
             if (e.data.code == 404){
                 try{
                     const newEntry = await pb.collection('day_track').create({
                         user: $currentUser?.id,
-                        date: date.toISOString(),
+                        date: selectedDate.toISOString(),
                         goal: calGoal,
                         weight: null,
                     })
-                    entry = newEntry;
+                    console.log('created day', newEntry.id)
+                    return newEntry;
                 } catch (er){
                     console.log(er)
                 }
             }
+            console.log(e)
         }
-        weight = entry.weight;
-        dayID = entry.id;
+    }
 
-
+    async function getDayMeals(dayID: string){
         // get meals for this day
         let meals_resp = await pb.collection('meal_entry').getList(1, 50, {
-            filter: 'day.id = "' + entry.id + '"',
+            filter: 'day.id = "' + dayID + '"',
             expand: 'food',
             sort: 'created'
         })
@@ -108,8 +119,8 @@
                 food: m.expand.food,
             }
         });
-
-    })
+        return meals
+    }
 
     function removeMeal(event: any){
         meals = meals.filter((m) => m.id !== event.detail.id);
@@ -147,7 +158,19 @@
         })
     }
 
-    function dateStr(){
+    async function loadDay(selectedDate: Date){
+        if ( ! selectedDate || ! $currentUser ) return;
+        // console.log(selectedDate)
+        const entry = await getDayEntry(selectedDate);
+        
+        weight = entry.weight;
+        dayID = entry.id;
+
+        meals = await getDayMeals(entry.id);
+        previousSelected = selected;
+    }
+
+    function dateStr(date){
         const d = date.getDate();
         if (d > 3 && d < 21) return d +'th';
         switch (d % 10) {
@@ -179,13 +202,28 @@
             </div> 
         </div>
         <div class="">
-            <div class="inline-flex ml-12">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgb(168 85 247)" class="w-8 h-8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                </svg>
-                <div class="pl-2">
-                    <p>{dateStr()}</p>
-                </div>
+            <div class="inline-flex ml-12 transition-none">
+                
+                <Datepicker bind:selected let:key let:send let:receive theme={
+                {calendar: {
+                    maxWidth: '100vw',
+                    colors: {
+                        background: {
+                            highlight: 'rgb(168 85 247)'
+                        }
+                    },
+                    transition: 'none',
+                }}}>
+                    <button  in:receive|local={{ key }} out:send|local={{ key }}>
+                        <div class="inline-flex mx-auto items-center space-x-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgb(168 85 247)" class="w-8 h-8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                            </svg>
+                            {dateStr(selected)}
+                        </div>
+                    </button>
+                </Datepicker>
+                
             </div>
             {#if dayID}
                 <Weight id={dayID} {weight}/>

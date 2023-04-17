@@ -5,7 +5,7 @@
     export let id: string;
 
     async function submitWeight() {
-
+        console.log(id)
         pb.collection('day_track').update(id, {
             weight: weight
         })

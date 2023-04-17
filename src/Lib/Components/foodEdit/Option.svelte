@@ -93,7 +93,6 @@
         calcOpen = true;
         setTimeout(() => {
             const inputEl = document.getElementById(`calc-${i}`) as HTMLInputElement;
-            console.log(inputEl, i)
             inputEl.focus();
         }, 34);
     }
