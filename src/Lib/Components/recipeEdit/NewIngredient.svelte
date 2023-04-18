@@ -1,12 +1,14 @@
 <script lang="ts">
-
-    import { pb } from '../../pb/pocketbase';
-    import FoodOption from './FoodOption.svelte';
-    import BarcodeHandler from '../scanner/BarcodeHandler.svelte';
     import { createEventDispatcher } from 'svelte';
+    import { pb } from '../../pb/pocketbase';
+    
+    
+    import FoodOption from '../tracker/FoodOption.svelte';
+
     const dispatch = createEventDispatcher();
 
-    export let dayID: string;
+    let addEl: HTMLElement;
+
     let name:string = '';
     let adding: boolean = false;
     let foods: any[] = [];
@@ -15,12 +17,11 @@
 
     let quickName: string = '';
     let quickQuantity: number|null;
+    let quickCost: number|null;
 
     $: {name, searchFoods()}
 
-    let addEl: HTMLElement;
-
-    async function searchFoods() {
+    async function searchFoods(){
         if (name.length < 1) {
             foods = [];
             return;
@@ -29,89 +30,27 @@
         try {
             const results = await pb.collection('foods').getList(1, 15, {
                 filter: 'name ~ "' + name + '" || brands ~ "' + name + '"',
-                sort: 'created'
+                sort: '-created'
             })
-            foods = results.items
+            // filter by what percentage of food's name is the same as the search term
+            foods = results.items.sort((a: any, b: any) => {
+                const pattern = new RegExp(name, 'g');
+                
+                const occursA =  a.name.match(pattern)?.length || 0;
+                const occursB =  b.name.match(pattern)?.length || 0;
+
+                const coverA = occursA / a.name.length;
+                const coverB = occursB / b.name.length;
+                
+                return coverB - coverA;
+            })
         } catch (error) {
             console.log(error)
-        }
-    }
-
-    async function getFood(id: string){
-        try{
-            const food = await pb.collection('foods').getOne(id, {});
-            return food;
-        } catch (error) {
-            console.log(error)
-            return false;
-        }
-    }
-
-    async function quickAdd(){
-
-        const food = await getFood('448ohrs7rgvbxak'); // id of basic food
-        if (!food) {
-            console.log("couldn't fetch quick cal food data")
-            return;
-        }
-
-        const data = {
-            day: dayID,
-            name: quickName,
-            food: '448ohrs7rgvbxak',
-            quantity: quickQuantity,
-            measure: 'cal',
-            calories: quickQuantity,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            cost: 0,
-        }
-
-        try {
-            const newEntry = await pb.collection('meal_entry').create(data);
-            resetOptions()           
-
-            dispatch('addMeal', {
-                entry: newEntry,
-                food: food
-            });           
-        } catch (error) {
-            console.log(error);
-        }
-
-    }
-
-    async function addMeal(event: any) {
-
-        const data = {
-            day: dayID,
-            name: event.detail.name,
-            food: event.detail.food_id,
-            quantity: event.detail.quantity,
-            measure: event.detail.measure,
-            calories: Math.round(event.detail.calories),    
-            protein: Math.round(event.detail.protein),
-            carbs: Math.round(event.detail.carbs),
-            fat: Math.round(event.detail.fat),
-            cost: parseFloat(event.detail.cost).toFixed(2),
-        }
-
-        try {
-            const newEntry = await pb.collection('meal_entry').create(data);
-            resetOptions()
-            
-            dispatch('addMeal', {
-                entry: newEntry,
-                food: event.detail.food
-            });
-            
-        } catch (error) {
-            console.log(error);
         }
     }
 
     function swapAddType(type: string){
+        // console.log(type)
         addType = type;
         document.querySelectorAll('.addTypeIcon').forEach((el) => {
             el.classList.remove('selected');
@@ -127,12 +66,46 @@
         addType = 'db';
     }
 
+    function addIngredient(food: any){
+        dispatch('addIngredient', food.detail);
+        resetOptions();
+    }
+
+    async function quickAddIngredient(){
+        
+        try {
+            const food = await pb.collection('foods').getOne('448ohrs7rgvbxak', {});
+            
+            const data = {
+                name: quickName,
+                food: food,
+                quantity: quickQuantity,
+                // cost: quickCost,
+                measure: 'calories'
+            }
+            
+            dispatch('addIngredient', data);
+
+        } catch (error) {
+            console.log(error)
+            return
+        }
+
+
+        
+    }
+
+    
+
 </script>
+
+
+
 
 <div class="flex w-full justify-center" bind:this={addEl}>
     {#if !adding}
      <div on:mousedown={() => {adding = true; addEl.scrollIntoView()}}>
-        <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="32" height="32" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5.25 13.25C5.25 9.47876 5.25 7.59315 6.42157 6.42157C7.59315 5.25 9.47876 5.25 13.25 5.25H28.75C32.5212 5.25 34.4069 5.25 35.5784 6.42157C36.75 7.59315 36.75 9.47876 36.75 13.25V28.75C36.75 32.5212 36.75 34.4069 35.5784 35.5784C34.4069 36.75 32.5212 36.75 28.75 36.75H13.25C9.47876 36.75 7.59315 36.75 6.42157 35.5784C5.25 34.4069 5.25 32.5212 5.25 28.75V13.25Z" stroke="rgb(168 85 247)" stroke-width="2"/>
             <path d="M21 14L21 28" stroke="rgb(168 85 247)" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
             <path d="M28 21L14 21" stroke="rgb(168 85 247)" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
@@ -158,43 +131,46 @@
               </svg>
             </button>
             <button title="Close" on:click={()=> adding = false} class="addTypeIcon p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="darkred" class="bi bi-x" viewBox="0 0 16 16">
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="darkred" class="bi bi-x" viewBox="0 0 16 16">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                      </svg>
             </button>
         </div>
 
         <div class="flex flex-col w-full">
             {#if addType === 'quick'}
-                <form on:submit|preventDefault={quickAdd} class="grid grid-cols-7">
-                    <h2 class="col-span-7 p-2 mx-auto">Quick Add Food</h2>
-                    <input type="text" placeholder="name" bind:value={quickName} class="col-span-4 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
-                    <input type="number" placeholder="calories" bind:value="{quickQuantity}" class="p-2 col-span-2 mx-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
-                    <button type="button"  on:click={ quickAdd } on:keypress class="mx-auto">
+                <form on:submit|preventDefault class="grid grid-cols-5">
+                    <h2 class="col-span-8 p-2 mx-auto text-sm">Quick Add Food</h2>
+                    <input type="text" placeholder="Name" bind:value={quickName} class="col-span-4 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg text-sm">
+                    <input type="number" placeholder="Calories" bind:value="{quickQuantity}" class="p-2 col-span-1 mx-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg text-sm">
+                    <!-- <input type="number" placeholder="Cost" bind:value="{quickCost}" class="p-2 col-span-1 rounded mr-2 outline-none drop-shadow-sm focus:drop-shadow-lg text-sm"> -->
+                    <button type="button" on:keypress class="mx-auto" on:click={quickAddIngredient}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </button>
                 </form>
+            
             {:else if addType === 'db'}
-                <form on:submit|preventDefault={addMeal} class="w-full grid grid-cols-7">
-                    <h2 class="col-span-7 p-2 mx-auto">Search from DB</h2>
-                    <input type="text" placeholder="search by name" bind:value={name} class="col-span-7 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
+                <form on:submit|preventDefault class="w-full grid grid-cols-7">
+                    <h2 class="col-span-7 p-2 mx-auto text-sm">Search from DB</h2>
+                    <input type="text" placeholder="Search by name" bind:value={name} class="col-span-7 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg text-sm">
                     
                     {#if foods.length > 0}
-                        <ul class="col-span-full">
+                        <ul class="col-span-full space-y-1">
                             {#each foods as food}
-                                <FoodOption {food} on:addMeal={addMeal}/>
+                                <FoodOption {food} on:addMeal={addIngredient}/>
                             {/each}
                         </ul>
                     {/if}
                 </form>
+            
             {:else if addType = "scan"}
                 <div class="mx-auto p-3">
                     {#if 'BarcodeDetector' in window}
-                        <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal}/>
+                        <!-- <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal}/> -->
                     {:else}
-                        <p class="">Barcode scanning is not supported on your device</p>
+                        <!-- <p class="">Barcode scanning is not supported on your device</p> -->
                     {/if}
                 </div>
             {/if}
@@ -208,6 +184,5 @@
 <style>
     button.selected {
         outline: solid green 1px;
-    }
-    
+    }    
 </style>

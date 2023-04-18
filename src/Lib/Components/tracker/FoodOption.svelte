@@ -33,10 +33,10 @@
 
 
 <div class="grid grid-cols-8 items-center">
-    <img src="{image}?thumb=50x50" alt='placeholder' class="col-span-1 " height="50px" width="50px"/>
-    <p class="col-span-3 p-1">{food.name}</p>  
-    <input type="number" placeholder="qty" bind:value={quantity} class="px-1 mr-2 focus:outline-none h-6 rounded-sm drop-shadow">
-    <select class="col-span-1 focus:outline-none h-6 mr-[-20px] rounded-sm drop-shadow" bind:value={measure}>
+    <img src="{image}?thumb=50x50" alt='placeholder' class="col-span-1 " height="45px" width="45px" title="{food.brands}"/>
+    <p class="col-span-3 p-1 text-sm" title="{food.brands}">{food.name}</p>  
+    <input type="number" placeholder="qty" bind:value={quantity} class="px-1 mr-2 focus:outline-none h-6 rounded-sm drop-shadow text-sm">
+    <select class="col-span-1 focus:outline-none h-6 mr-[-20px] rounded-sm drop-shadow text-sm" bind:value={measure} >
         {#each options as option (option)}
                 <option value="{option.measure}" title="{option.desc ? option.desc : ''}" >
                     {option.measure}

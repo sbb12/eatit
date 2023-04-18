@@ -19,7 +19,7 @@
         } 
         try {
             const results = await pb.collection('foods').getList(1, 15, {
-                filter: 'name ~ "' + searchInput + '"',
+                filter: 'name ~ "' + searchInput + '" || brands ~ "' + searchInput + '"',
                 sort: 'created'
             })
             foods = results.items;
@@ -31,16 +31,19 @@
     function handleClose(event: Event){
         editing = false;
         editId = null;
+        searchFoods()
     }
 
     function handleUpdate(event: Event){
         editing = false;
         editId = null;
+        searchFoods()
     }
 
     function handleCreate(event: Event){
         editing = false;
         editId = null;
+        searchFoods()
     }
 
     function handleEdit(event: Event){
@@ -84,16 +87,16 @@
     {:else}
         <input type="text" bind:value={searchInput} placeholder="Search by name" class="w-full shadow appearance-none border py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
         
-        <ul class="my-4 w-full">
+        <ul class="my-4 w-full ">
             {#each foods as food}
-            <li class="">
-                <img src="{`https://pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}">
-                <p>
+            <li class=" inline-flex w-full items-center">
+                <img src="{`https://pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}" class="h-[50px] w-[50px]">
+                <p class="text-left w-full px-2">
                     {food.name}
                 </p>
-                <div class="buttons">
-                    <button type="button" on:click={()=>{promptDelete(food)}}>❌</button>
+                <div class="buttons ml-auto inline-flex space-x-2">
                     <button type="button" on:click={()=>{editing=true, editId=food.id}}>🔧</button>
+                    <button type="button" on:click={()=>{promptDelete(food)}}>❌</button>
                 </div>
 
             </li>
@@ -119,40 +122,3 @@
     
 </main>
 
-
-<style lang="scss">
-    main {
-        ul {
-            li {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                padding: 4px 0;
-
-                img {
-                    height: 50px;
-                    width: 50px;
-                }
-                p {
-                    width: 180px;
-                    padding: 0 8px;
-                }
-                span {
-                    width: 80px;
-                    padding: 0 8px;
-                }
-                .buttons{
-                    width: 140px;
-                    display: flex;
-                    flex-direction: row-reverse;
-
-                    button {
-                        padding: 4px;
-                        margin: 0 4px;
-                    }
-                }
-                
-            }
-        }
-    }
-</style>
