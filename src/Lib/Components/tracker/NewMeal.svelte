@@ -31,7 +31,19 @@
                 filter: 'name ~ "' + name + '" || brands ~ "' + name + '"',
                 sort: 'created'
             })
-            foods = results.items
+
+            foods = results.items.sort((a: any, b: any) => {
+                const pattern = new RegExp(name, 'g');
+                
+                const occursA =  a.name.match(pattern)?.length || 0;
+                const occursB =  b.name.match(pattern)?.length || 0;
+
+                const coverA = occursA / a.name.length;
+                const coverB = occursB / b.name.length;
+                
+                return coverB - coverA;
+            })
+
         } catch (error) {
             console.log(error)
         }

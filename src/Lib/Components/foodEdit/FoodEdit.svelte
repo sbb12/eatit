@@ -8,6 +8,8 @@
     import Option from './Option.svelte';
     import type { OptionType } from '../../types/types'
 
+    import AutoTextArea from '../AutoTextArea.svelte';
+
     export let id: string|null = null;
     export let apiData: any = null;
 
@@ -225,7 +227,7 @@
 
 
 
-<form class="bg-[#F6F6F6] p-4 w-[100%] max-w-[500px] z-50 relative" >
+<div class="bg-[#F6F6F6] p-4 w-[100%] max-w-[500px] z-50 relative" >
     <input type="hidden" bind:value={id}>
     <button class="absolute top-2 right-4" type="button" on:click|preventDefault={closed}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="darkred" class="w-6 h-6">
@@ -237,14 +239,10 @@
     <div class="head flex flex-row items-center justify-between">
         <ImageHandler bind:image bind:imageChange bind:imageUrl/>
 
-        <div class="flex flex-col items-end mt-6">
-            <label>
-                <input type="text" placeholder="Brands" bind:value={brands} class="ml-auto h-10 px-2 my-1 rounded outline-none drop-shadow-sm focus:drop-shadow-lg" title="Brand(s separate by commas)">
-            </label>
-            <label>
-                <input type="text" placeholder="Name" bind:value={name} class="ml-auto h-10 px-2 my-1 rounded outline-none drop-shadow-sm focus:drop-shadow-lg" title="Name">
-            </label>
-            <input type="text" placeholder="Barcode" bind:value={barcode} class="h-10 px-2 py-1 text-right bg-transparent">
+        <div class="flex flex-col items-end mt-6 space-y-1">
+                <AutoTextArea bind:value={brands} maxRows={2} maxCols={15} placeholder={'Brands'} title={'Brand(s separated by commas'} />
+                <AutoTextArea bind:value={name} maxRows={2} maxCols={15} placeholder={'Name'} title={'name'} />
+            <input type="text" placeholder="Barcode" bind:value={barcode} class="h-10 px-2 py-1 text-right bg-transparent outline-none">
         </div>
     </div>
 
@@ -262,11 +260,8 @@
     <div class="w-full inline-flex flex-row-reverse">
         <button on:click|preventDefault = {handleSubmit} class="px-6 py-2 border border-purple-500 rounded-lg text-purple-500 font-semibold">Submit</button>
     </div>
-</form>
-
-<!-- <canvas id="canvas" width="200" height="200"></canvas> -->
-<div class="mx-auto my-20">
-    
 </div>
+
+
 
 
