@@ -16,7 +16,7 @@
 
     function deleteEntry() {
         pb.collection('meal_entry').delete(id)
-        dispatch('removeMeal', {id});
+        dispatch('removeMeal', id);
     }    
 
     async function updateMeal() {

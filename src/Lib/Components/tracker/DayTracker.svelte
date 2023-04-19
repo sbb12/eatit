@@ -8,8 +8,6 @@
     import NutritionPie from './NutritionPie.svelte';
 
     let dayID = '';
-    
-    
     let weight: number|null = null;
     let calGoal: number;
     let calConsumed: number = 0;
@@ -97,7 +95,7 @@
         }
     }
 
-    async function getDayMeals(dayID: string){
+    async function getDayMeals(dayID: string): Promise<any[]>{
         // get meals for this day
         let meals_resp = await pb.collection('meal_entry').getList(1, 50, {
             filter: 'day.id = "' + dayID + '"',
@@ -122,11 +120,11 @@
         return meals
     }
 
-    function removeMeal(event: any){
-        meals = meals.filter((m) => m.id !== event.detail.id);
+    function removeMeal(event: any): void{
+        meals = meals.filter((m) => m.id !== event.detail);
     }
 
-    function addMeal(event: any){
+    function addMeal(event: any): void{
 
         const meal = {
             id: event.detail.entry.id,
@@ -143,7 +141,7 @@
         meals = [...meals, meal];
     }
 
-    function updateMeal(event: any){
+    function updateMeal(event: any): void{
         meals = meals.map((m) => {
             if (m.id === event.detail.id) {
                 return {
@@ -159,18 +157,18 @@
         mealCalc()
     }
 
-    async function loadDay(selectedDate: Date){
+    async function loadDay(selectedDate: Date): Promise<void>{
         if ( ! selectedDate || ! $currentUser ) return;
         const entry = await getDayEntry(selectedDate);
         
-        weight = entry.weight;
-        dayID = entry.id;
+        weight = entry?.weight;
+        dayID = entry?.id;
 
-        meals = await getDayMeals(entry.id);
+        meals = await getDayMeals(entry?.id);
         previousSelected = selected;
     }
 
-    function dateStr(date){
+    function dateStr(date: Date): string{
         const d = date.getDate();
         if (d > 3 && d < 21) return d +'th';
         switch (d % 10) {
@@ -184,7 +182,7 @@
 </script>
 
 
-<div class="flex flex-col sm:inline-flex ">
+<div class="flex flex-col w-full max-w-[500px]">
     <div class="trackbox bg-gray-100 m-2 py-8 px-6 w-full max-w-[500px]">
         <div class="headers flex flex-row justify-between ">
             <div class="flex flex-col">
@@ -232,7 +230,7 @@
         </div>
 
         <div class="my-10">
-            {#each meals as meal}
+            {#each meals as meal (meal.id)}
                 <MealEntry meal={meal} on:removeMeal={removeMeal} on:updateMeal={updateMeal}/>
             {/each}
         </div>
@@ -241,8 +239,8 @@
         {/if}
     </div>
 
-    <div class="relate">
-        <div class="absolute">
+    <div class=" mx-auto {cost ? '' : 'hidden'}">
+        <div class="">
             <NutritionPie labels={['protein', 'carbs', 'fat']} values={[protein, carbs, fat]} {cost} />
         </div>
     </div>
