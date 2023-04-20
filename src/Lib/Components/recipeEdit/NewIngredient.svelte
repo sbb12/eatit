@@ -113,7 +113,7 @@
     </div>
     {:else}
     <div class="flex flex-col w-full">
-        <div class="inline-flex justify-evenly">
+        <div class="inline-flex w-full justify-evenly">
             <button title="Search Database" id="db" on:click={()=>{swapAddType('db')}} class="addTypeIcon selected p-1">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 8V8C9.18741 10.991 14.8126 10.991 19 8V8V18V18C14.6624 20.4786 9.33755 20.4786 5 18V18V8Z" fill="#7E869E" fill-opacity="0.25"/>

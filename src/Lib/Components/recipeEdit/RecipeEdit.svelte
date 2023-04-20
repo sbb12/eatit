@@ -243,14 +243,14 @@
                 <AutoTextArea bind:value={name} maxRows={2} maxCols={15} placeholder={'Name'} title={'name'} />
 
                 <label for="" class="text-sm"> number of servings: 
-                    <input type="number" inputmode="numeric" step="any" bind:value={no_servings} class="w-8 px-2 text-right text-sm">
+                    <input type="number" inputmode="numeric" step="any" bind:value={no_servings} class="w-8 px-2 text-right text-sm rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
                 </label>
                 <p class="text-sm"> calories per serving: <span class="text-purple-500 font-semibold">{Math.round(serving_calories)}</span></p>
             </div>
         </div>
 
         <div class="flex flex-col items-center py-2">
-            <div class="inline-flex items-center space-x-4">
+            <div class="flex flex-col w-full items-center space-x-4">
                 <h1 class="py-2 font-semibold">Ingredients</h1>  
                 <NewIngredient on:addIngredient={addIngredient}/>
             </div>
