@@ -10,7 +10,7 @@
     let addEl: HTMLElement;
 
     let name:string = '';
-    let adding: boolean = false;
+    export let adding: boolean = false;
     let foods: any[] = [];
 
     let addType: string = 'db';

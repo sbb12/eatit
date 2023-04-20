@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { createEventDispatcher } from 'svelte';
-    import { pb } from '../../pb/pocketbase';
+    import { currentUser, pb } from '../../pb/pocketbase';
 	import type { Record } from 'pocketbase';
 
     import NewIngredient from './NewIngredient.svelte';
@@ -15,6 +15,7 @@
     const dispatch = createEventDispatcher();
 
     export let id: string = '';
+    let adding: boolean = false;
     
     let name: string = '';
     let no_servings: number = 1;
@@ -35,7 +36,8 @@
     $: ingredients && calcNutrition();
     $: no_servings && calcNutrition();
 
-    onMount(async () => {
+    onMount(async () => {       
+        
         if (id) {
             try {
                 const record = await pb.collection('recipes').getOne(id);     
@@ -149,6 +151,7 @@
         formData.append('serving_fat', serving_fat.toString());
         formData.append('serving_carbs', serving_carbs.toString());
         formData.append('serving_cost', serving_cost.toString());
+        formData.append('user', $currentUser.id)
 
         if (imageChange) {
             formData.append('image', image);
@@ -157,7 +160,8 @@
         if (id){ // update
             try{
                 const record = await pb.collection('recipes').update(id, formData);
-                close()
+                id = record.id;
+                saveRecipeAsFood();
             } catch (e) {
                 console.log('could not update record: ' + id, e);
             }
@@ -169,13 +173,51 @@
             }
             try {
                 const record = await pb.collection('recipes').create(formData);
-                close();
+                saveRecipeAsFood();
                 id = record.id;
             } catch (e) {
                 console.log('could not create record', e);
             }
         }
+    }
 
+    async function saveRecipeAsFood(){
+        const formData = new FormData();
+        
+        formData.append('name', name);
+        if (imageChange) {
+            formData.append('image', image);
+        }
+        formData.append('type', 'recipe');
+        formData.append('recipe', id);
+        formData.append('user', $currentUser.id)
+        formData.append('options', JSON.stringify([{
+            measure: 'serving',
+            calories: serving_calories,
+            protein: serving_protein,
+            fat: serving_fat,
+            carbs: serving_carbs,
+            cost: serving_cost,
+        }]));
+
+        // try update
+        try {
+            // update record if exists
+            const foodRecord = await pb.collection('foods').getFirstListItem(`recipe.id = "${id}"`);
+            
+            const record = await pb.collection('foods').update(foodRecord.id, formData);
+
+        } catch (e) {
+            // create new record
+            try {
+                const record = await pb.collection('foods').create(formData);
+            } catch (e) {
+                console.log('could not create record', e);
+            }
+            
+        }
+
+        close()
     }
 
     async function deleteRecipe(){
@@ -250,15 +292,14 @@
         </div>
 
         <div class="flex flex-col items-center py-2">
-            <div class="flex flex-col w-full items-center space-x-4">
+            <div class="flex flex-col w-full items-center space-x-4 mb-2">
                 <h1 class="py-2 font-semibold">Ingredients</h1>  
-                <NewIngredient on:addIngredient={addIngredient}/>
+        
+                {#each ingredients as ingredient (ingredient.food.id)}
+                    <IngredientEntry name={ingredient.name} food={ingredient.food} quantity={ingredient.quantity} measure={ingredient.measure} on:removeIngredient={removeIngredient} on:updateNumbers={updateNumbers}/>
+                {/each}
             </div>
-
-            {#each ingredients as ingredient (ingredient.food.id)}
-                <IngredientEntry name={ingredient.name} food={ingredient.food} quantity={ingredient.quantity} measure={ingredient.measure} on:removeIngredient={removeIngredient} on:updateNumbers={updateNumbers}/>
-            {/each}
-
+            <NewIngredient on:addIngredient={addIngredient} bind:adding/>
         
         </div>
 

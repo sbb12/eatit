@@ -9,14 +9,19 @@
     export let dayID: string;
     let name:string = '';
     let adding: boolean = false;
+    let foods_results: any[] = [];
     let foods: any[] = [];
 
     let addType: string = 'db';
+    let includeBasic: boolean = true;
+    let includeBranded: boolean = true;
+    let includeRecipe: boolean = true;
 
     let quickName: string = '';
     let quickQuantity: number|null;
 
     $: {name, searchFoods()}
+    $: {includeBasic, includeBranded, includeRecipe, filterFoodsByIncludes()}
 
     let addEl: HTMLElement;
 
@@ -27,12 +32,13 @@
         } 
         foods = [];
         try {
-            const results = await pb.collection('foods').getList(1, 15, {
+            // get records
+            foods_results = await pb.collection('foods').getList(1, 15, {
                 filter: 'name ~ "' + name + '" || brands ~ "' + name + '"',
                 sort: 'created'
-            })
+            })            
 
-            foods = results.items.sort((a: any, b: any) => {
+            foods_results = foods_results.items.sort((a: any, b: any) => {
                 const pattern = new RegExp(name, 'g');
                 
                 const occursA =  a.name.match(pattern)?.length || 0;
@@ -42,11 +48,32 @@
                 const coverB = occursB / b.name.length;
                 
                 return coverB - coverA;
-            })
+            })            
+
+            filterFoodsByIncludes();
 
         } catch (error) {
             console.log(error)
         }
+    }
+
+    function filterFoodsByIncludes(){
+        console.log('filtering foods')
+        if (includeBasic && includeBranded && includeRecipe) {
+            foods = foods_results;
+        }
+        foods = foods_results.filter((food: any) => {
+            if (food.type === 'basic' && includeBasic) {
+                return true;
+            }
+            if (food.type === 'branded' && includeBranded) {
+                return true;
+            }
+            if (food.type === 'recipe' && includeRecipe) {
+                return true;
+            }
+            return false;
+        })
     }
 
     async function getFood(id: string){
@@ -192,10 +219,24 @@
                 <form on:submit|preventDefault={addMeal} class="w-full grid grid-cols-7">
                     <h2 class="col-span-7 p-2 mx-auto">Search from DB</h2>
                     <input type="text" placeholder="search by name" bind:value={name} class="col-span-7 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
+                    <div class="col-span-full flex justify-between my-2 px-2">
+                        <label for="">
+                            <input type="checkbox" bind:checked={includeBasic}> 
+                            Basic foods
+                        </label>
+                        <label for="">
+                            <input type="checkbox" bind:checked={includeBranded}> 
+                            Branded products
+                        </label>                        
+                        <label for="">
+                            <input type="checkbox" bind:checked={includeRecipe}> 
+                            Recipes
+                        </label>
+                    </div>
                     
                     {#if foods.length > 0}
                         <ul class="col-span-full">
-                            {#each foods as food}
+                            {#each foods as food (food.id)}
                                 <FoodOption {food} on:addMeal={addMeal}/>
                             {/each}
                         </ul>
