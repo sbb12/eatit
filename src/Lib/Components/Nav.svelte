@@ -1,18 +1,17 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import { pb, currentUser } from "../pb/pocketbase";
     import AnimatedBurger from "./AnimatedBurger.svelte";
 
     let mobileMenuEl: HTMLElement;
-    export let open = false;
-    $: innerWidth = 0;
+    export let open: boolean = false;
+    let innerWidth: number = 0;
 
-    function onClick(){        
+    function onClick(): void {        
         open = !open;
         !open ? mobileMenuEl.classList.add('closed') : mobileMenuEl.classList.remove('closed');
     }
 
-    function logout() {
+    function logout(): void {
         pb.authStore.clear();
     }
 

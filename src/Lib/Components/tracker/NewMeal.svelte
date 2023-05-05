@@ -16,6 +16,7 @@
     let includeBasic: boolean = true;
     let includeBranded: boolean = true;
     let includeRecipe: boolean = true;
+    let filterOpen: boolean = false;
 
     let quickName: string = '';
     let quickQuantity: number|null;
@@ -218,8 +219,20 @@
             {:else if addType === 'db'}
                 <form on:submit|preventDefault={addMeal} class="w-full grid grid-cols-7">
                     <h2 class="col-span-7 p-2 mx-auto">Search from DB</h2>
-                    <input type="text" placeholder="search by name" bind:value={name} class="col-span-7 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
-                    <div class="col-span-full flex justify-between my-2 px-2">
+                    <input type="text" placeholder="search by name" bind:value={name} class="col-span-6 p-2 rounded outline-none drop-shadow-sm focus:drop-shadow-lg">
+                    <button class="col-span-1 flex justify-center items-center" on:click={()=>{filterOpen = !filterOpen}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0_16_151)">
+                            <path d="M21 4V6H20L15 13.5V22H9V13.5L4 6H3V4H21ZM6.404 6L11 12.894V20H13V12.894L17.596 6H6.404Z" fill="#555"/>
+                            </g>
+                            <defs>
+                            <clipPath id="clip0_16_151">
+                            <rect width="24" height="24" fill="white"/>
+                            </clipPath>
+                            </defs>
+                        </svg>
+                    </button>
+                    <div class="col-span-full flex justify-between my-4 px-4 {filterOpen ? '' : 'hidden'}">
                         <label for="">
                             <input type="checkbox" bind:checked={includeBasic}> 
                             Basic foods

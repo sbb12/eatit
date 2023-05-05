@@ -183,7 +183,7 @@
 
 
 <div class="flex flex-col w-full max-w-[500px]">
-    <div class="trackbox bg-gray-100 m-2 py-8 px-6 w-full max-w-[500px]">
+    <div class="trackbox bg-gray-100 py-8 px-6 w-full max-w-[500px]">
         <div class="headers flex flex-row justify-between ">
             <div class="flex flex-col">
                 <div class="inline-flex h-10">
