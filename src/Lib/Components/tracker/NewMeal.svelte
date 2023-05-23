@@ -59,7 +59,6 @@
     }
 
     function filterFoodsByIncludes(){
-        console.log('filtering foods')
         if (includeBasic && includeBranded && includeRecipe) {
             foods = foods_results;
         }

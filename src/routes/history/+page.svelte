@@ -9,6 +9,7 @@
     }
 
     let chartEl: HTMLCanvasElement;
+    let noData: boolean = false;
 
     async function getWeightData(){
         const weightResp = await pb.collection('day_track').getList(1, 50, {
@@ -46,17 +47,22 @@
     }
 
     onMount(async () => {
-        const data = await getWeightData();
+        const data = await getWeightData()
+        if (data.length == 0) {
+            noData = true;
+        }
         drawChart(data);
     })
 
 
 </script>
 
-<div >
+<div>
     <canvas bind:this={chartEl}>
-        
     </canvas>
+    {#if noData}
+        <p class="text-center">Looks like you don't have any data yet. you can being recording your weight on the <a href='/track' class="underline">Track</a> page</p>
+    {/if}
 </div>
 
 

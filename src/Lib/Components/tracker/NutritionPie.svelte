@@ -65,11 +65,12 @@
         }
       });
 
-      updateChart();
+      // updateChart();
     });
   
     
   </script>
+
   
   <div bind:this={infoEl} class="h-[300px] w-[300px] top-0 hidden">
     <canvas id="chart" bind:this={chartEl}></canvas>

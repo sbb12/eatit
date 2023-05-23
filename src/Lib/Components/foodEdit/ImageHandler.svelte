@@ -154,7 +154,6 @@
         });
     }
 
-
     /**
      * Converts a canvas element to a Blob.
      * @async
