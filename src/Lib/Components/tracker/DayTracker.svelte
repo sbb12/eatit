@@ -25,7 +25,7 @@
         date = new Date();
     }
     let selected = date;
-    let previousSelected;
+    let previousSelected: any;
     $:selected && (selected != previousSelected) && loadDay(selected);
 
     let meals: any[] = [];
@@ -76,7 +76,7 @@
             })
             dayID = day_resp.id;
             return day_resp;            
-        } catch (e) { // create day entry 
+        } catch (e:any) { // create day entry 
             if (e.data.code == 404){
                 try{
                     const newEntry = await pb.collection('day_track').create({
@@ -163,12 +163,11 @@
         
         if ( ! selectedDate || ! $currentUser ) return;
         
-        console.log('loading day')
         const entry = await getDayEntry(selectedDate);
         
-        dayID = entry?.id;
+        dayID = entry?.id!;
 
-        meals = await getDayMeals(entry?.id);
+        meals = await getDayMeals(entry?.id!);
         previousSelected = selected;
 
         // remove loading

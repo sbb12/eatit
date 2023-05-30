@@ -51,7 +51,6 @@
 
 
 <main class="mx-auto max-w-[500px] px-2 flex flex-col my-4 relative">
-
     {#if editing}
         <RecipeEdit id={editId} on:close={closeEdit}/>
     {:else}
@@ -60,7 +59,7 @@
         <ul class="w-full">
             {#each recipes as recipe}
                 <li class="inline-flex items-center w-full">
-                    <img src="{`https://pb.surgo.dev/api/files/${recipe.collectionId}/${recipe.id}/${recipe.image}?thumb=50x50`}" alt="{recipe.name}" width="45px" height="45px">
+                    <img src="{`https://pb.sercan.co.uk/api/files/${recipe.collectionId}/${recipe.id}/${recipe.image}?thumb=50x50`}" alt="{recipe.name}" width="45px" height="45px">
                     
                     <p class="w-full px-2">{recipe.name}</p>
                     <p class="w-fit mx-2">{Math.round(recipe.serving_calories)}</p>

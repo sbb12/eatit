@@ -90,7 +90,7 @@
         <ul class="my-4 w-full ">
             {#each foods as food}
             <li class=" inline-flex w-full items-center">
-                <img src="{`https://pb.surgo.dev/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}" class="h-[50px] w-[50px]">
+                <img src="{`https://pb.sercan.co.uk/api/files/foods/${food.id}/${food.image}`}" alt="{food.name}" class="h-[50px] w-[50px]">
                 <p class="text-left w-full px-2">
                     {food.name}
                 </p>

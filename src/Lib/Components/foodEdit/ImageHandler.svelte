@@ -18,7 +18,7 @@
 
     async function imageFromUrl(imageUrl: string|null){
         // check if the image is from our server
-        if (imageUrl?.includes('pb.surgo.dev')) {
+        if (imageUrl?.includes('pb.sercan.co.uk')) {
             imgEl && (imgEl.src = imageUrl);
             return
         };

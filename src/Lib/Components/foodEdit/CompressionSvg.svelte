@@ -1,7 +1,3 @@
-<script>
-
-</script>
-
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: #fff; display: block;" width="120px" height="116px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
     <g transform="translate(50 50)"> 
         <g transform="translate(-17 -17) scale(0.5)"> 

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from "svelte";
     import { pb, currentUser } from "../pb/pocketbase";
     import AnimatedBurger from "./AnimatedBurger.svelte";
+	import { redirect } from "@sveltejs/kit";
 
     let mobileMenuEl: HTMLElement;
     export let open: boolean = false;
@@ -13,8 +15,9 @@
 
     function logout(): void {
         pb.authStore.clear();
+        window.location.href = '/login';
     }
-
+    
 </script>
 
 <svelte:window bind:innerWidth/>
@@ -30,14 +33,13 @@
             <div class="flex items-center p-4">
                 <div class="flex items-center">
                     <a href="/track" class="ml-4">Track</a>
-                    <!-- <a href="/meals">Meals</a> -->
                     <a href="/foods" class="ml-4">Foods</a>
                     <a href="/history" class="ml-4">History</a>
                     <a href="/recipes" class="ml-4">Recipes</a>
                 </div>
             </div>
             <div class="flex items-center p-4">
-                <a href="/" on:click={logout}>Logout</a>
+                <a href="/signout" on:click={logout}>Logout</a>
             </div>
         {:else}
             <div class="z-[100]">
@@ -52,7 +54,7 @@
                 <li class="py-5 px-20"><a href="/foods"  on:click={onClick}>Foods</a></li>
                 <li class="py-5 px-20"><a href="/history" on:click={onClick}>History</a></li>
                 <li class="py-5 px-20"><a href="/recipes"  on:click={onClick}>Recipes</a></li>
-                <li class="py-5 px-20"><a href="/" on:click={logout} on:click={onClick}>Logout</a></li>
+                <li class="py-5 px-20"><a href="/signout" on:click={logout} on:click={onClick}>Logout</a></li>
             </ul>
             
         {/if}

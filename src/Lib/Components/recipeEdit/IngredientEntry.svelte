@@ -8,7 +8,7 @@
     export let measure: string;
 
     const options = food.options
-    const image = `https://pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}`
+    const image = `https://pb.sercan.co.uk/api/files/${food.collectionId}/${food.id}/${food.image}`
 
     let calories: number = 0;
     $: calories =  Math.round(quantity * options.find((option: any) => option.measure === measure).calories), updateNumbers();

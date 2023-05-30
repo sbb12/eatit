@@ -19,7 +19,7 @@
     
     let name: string = '';
     let no_servings: number = 1;
-    let ingredients: {food:{id:string}, name: string, quantity: number, measure: string}[] = [];
+    let ingredients: {food:{id:string, name:string, image:string, collectionID: string, options:any[], brands:string}, name: string, quantity: number, measure: string}[] = [];
     let instructions: any[] = [];
     let serving_calories: number = 0;
     let serving_protein: number = 0;
@@ -45,7 +45,7 @@
 
                 name = record.name;
                 no_servings = record.no_servings;
-                imageUrl = `https://pb.surgo.dev/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`;
+                imageUrl = `https://pb.sercan.co.uk/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`;
                 instructions = record.instructions;
                 serving_calories = record.serving_calories;
                 serving_protein = record.serving_protein;
@@ -81,7 +81,7 @@
         serving_cost = 0;
 
         ingredients.forEach((ingredient) => {
-            const option = ingredient.food.options.find((option) => option.measure === ingredient.measure);
+            const option = ingredient.food.options.find((option: any) => option.measure === ingredient.measure);
 
             serving_calories += (option.calories * ingredient.quantity / no_servings);
             serving_protein +=  (option.protein * ingredient.quantity / no_servings );
@@ -130,6 +130,11 @@
 
     async function saveRecipe() {
 
+        if ($currentUser?.name === 'guest' || !$currentUser) {
+            alert('Guest account can not perform this action')
+            return;
+        }
+
         const ingredientsJson = JSON.stringify(ingredients.map((ingredient) => {
             return {
                 food: ingredient.food.id,
@@ -151,10 +156,10 @@
         formData.append('serving_fat', serving_fat.toString());
         formData.append('serving_carbs', serving_carbs.toString());
         formData.append('serving_cost', serving_cost.toString());
-        formData.append('user', $currentUser.id)
+        formData.append('user', $currentUser!.id)
 
         if (imageChange) {
-            formData.append('image', image);
+            formData.append('image', image!);
         }
 
         if (id){ // update
@@ -182,11 +187,16 @@
     }
 
     async function saveRecipeAsFood(){
+        if ($currentUser?.name === 'guest' || !$currentUser) {
+            alert('Guest account can not perform this action')
+            return;
+        }
+
         const formData = new FormData();
         
         formData.append('name', name);
         if (imageChange) {
-            formData.append('image', image);
+            formData.append('image', image!);
         }
         formData.append('type', 'recipe');
         formData.append('recipe', id);
@@ -221,6 +231,11 @@
     }
 
     async function deleteRecipe(){
+        if ($currentUser?.name === 'guest' || !$currentUser) {
+            alert('Guest account can not perform this action')
+            return;
+        }
+
         const confirmed = confirm('Are you sure you want to delete this recipe?');
         if (!id || !confirmed) return;
 
@@ -232,16 +247,16 @@
         }
     }
 
-    function handleDragStart(event, index) {
+    function handleDragStart(event: any, index: number) {
         draggedItemIndex = index;
         event.dataTransfer.setData('text/plain', '');
     }
 
-    function handleDragOver(event) {
+    function handleDragOver(event: any) {
         event.preventDefault();
     }
 
-    function handleDrop(event, index) {
+    function handleDrop(event: any, index: number) {
         event.preventDefault();
 
         if (draggedItemIndex === null) return;
@@ -253,7 +268,7 @@
         draggedItemIndex = null;
     }
 
-    function removeInstruction(index) {
+    function removeInstruction(index: number) {
         instructions.splice(index, 1);
         instructions = [...instructions];
     }

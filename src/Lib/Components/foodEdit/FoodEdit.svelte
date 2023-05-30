@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
     import { createEventDispatcher } from 'svelte';
-    import { pb } from '../../pb/pocketbase';
+    import { pb, currentUser } from '../../pb/pocketbase';
     
     import ImageHandler from './ImageHandler.svelte';
 
@@ -20,7 +20,7 @@
     let imageUrl: string = '';
     let imageChange: boolean = false;
     
-    let options: OptionType[] = [];
+    let options: any[] = [];
 
     let imgEl: HTMLImageElement;
 
@@ -92,7 +92,7 @@
                 name = record?.name;
                 brands = record?.brands;
                 barcode = record?.barcode;
-                imageUrl = `https://pb.surgo.dev/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`
+                imageUrl = `https://pb.sercan.co.uk/api/files/${record.collectionId}/${record.id}/${record.image}?thumb=120x120`
                 options = record?.options;
             } catch (e) {
                 console.log('could not get record: ' + id, e)
@@ -178,6 +178,11 @@
             return;
         }
 
+        if ($currentUser?.name === 'guest' || !$currentUser) {
+            alert('Guest account can not perform this action')
+            return;
+        }
+
         // create formdata
         let formData = new FormData();
         formData.append('name', name);
@@ -194,7 +199,7 @@
         
         // add image if changed or added
         if (imageChange){
-            formData.append('image', image);
+            formData.append('image', image!);
         }
 
         if (id){ // update

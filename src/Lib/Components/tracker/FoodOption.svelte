@@ -1,9 +1,10 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from 'svelte';
+    import { flip } from 'svelte/animate';
     const dispatch = createEventDispatcher();
 
     export let food: any;
-    const image = `https://pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}`
+    const image = `https://pb.sercan.co.uk/api/files/${food.collectionId}/${food.id}/${food.image}`
 
     let quantity: number = 1;
     let options = food.options;
@@ -38,7 +39,7 @@
     <input type="number" placeholder="qty" bind:value={quantity} class="px-1 mr-2 focus:outline-none h-6 rounded-sm drop-shadow text-sm">
     <select class="col-span-1 focus:outline-none h-6 mr-[-20px] rounded-sm drop-shadow text-sm" bind:value={measure} >
         {#each options as option (option)}
-                <option value="{option.measure}" title="{option.desc ? option.desc : ''}" >
+                <option value="{option.measure}" title="{option.desc ? option.desc : ''}" animate:flip>
                     {option.measure}
                 </option>
         {/each}

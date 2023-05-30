@@ -38,7 +38,7 @@
 </script>
 
 <div class="meal-entry grid grid-cols-8 w-full rounded-sm items-center">
-    <img src="{`https://pb.surgo.dev/api/files/${food.collectionId}/${food.id}/${food.image}?thumb=50x50`}" alt='placeholder' title="{meal.food.brands}" class="col-span-1 p-1 w-[50px] h-[50px]"/>
+    <img src="{`https://pb.sercan.co.uk/api/files/${food.collectionId}/${food.id}/${food.image}?thumb=50x50`}" alt='placeholder' title="{meal.food.brands}" class="col-span-1 p-1 w-[50px] h-[50px]"/>
     <p class="font-semibold text-sm col-span-3 p-1 " title="{meal.food.brands}" >{meal.food.name != 'quick_add' ? meal.food.name : meal.name}</p>  
     <input type="number" class="col-span-1 w-[40px] bg-gray-100 focus:outline-none" bind:value={quantity} on:input={updateMeal}/>
     <select class="col-span-1 m-[-1rem] bg-gray-100" bind:value={measure} on:change={updateMeal}>
