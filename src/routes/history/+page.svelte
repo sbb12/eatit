@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Chart from 'chart.js/auto';
-    import { currentUser, pb } from '../../Lib/pb/pocketbase';
+    import { currentUser, pb } from '../../lib/pb/pocketbase';
 
     interface WeightData {
         date: string;
