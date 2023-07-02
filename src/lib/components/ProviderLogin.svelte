@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { pb } from "../../lib/pb/pocketbase";
+    import { pb } from "../pb/pocketbase";
     export let provider: string;
 
     async function login() {
