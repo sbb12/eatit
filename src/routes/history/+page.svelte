@@ -12,10 +12,19 @@
     let noData: boolean = false;
 
     async function getWeightData(){
-        const weightResp = await pb.collection('day_track').getList(1, 50, {
-            filter: 'user.id = "' + $currentUser?.id + '" && weight > 0',
-            sort: 'date',
-        }).then()
+        
+        let weightResp
+        try {
+
+            weightResp = await pb.collection('day_track').getList(1, 50, {
+                filter: 'user.id = "' + $currentUser?.id + '" && weight > 0',
+                sort: 'date',
+            })
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+
         if (weightResp.items.length > 0) {
 
             let data: any[] = [];

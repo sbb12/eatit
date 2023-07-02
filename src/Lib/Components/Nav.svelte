@@ -25,7 +25,7 @@
 <nav class="flex w-full justify-between bg-slate-200">
     <div class="text-2xl font-bold p-4">
         <a href="/">
-            EatIt
+            Eat
         </a>
     </div>    
     {#if $currentUser}

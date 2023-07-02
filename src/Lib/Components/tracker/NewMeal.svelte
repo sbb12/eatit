@@ -257,7 +257,7 @@
             {:else if addType = "scan"}
                 <div class="mx-auto p-3">
                     {#if 'BarcodeDetector' in window}
-                        <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal}/>
+                        <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal} on:addFood={addMeal}/>
                     {:else}
                         <p class="">Barcode scanning is not supported on your device</p>
                     {/if}

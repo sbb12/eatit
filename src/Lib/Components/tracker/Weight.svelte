@@ -25,7 +25,7 @@
 </script>
 
 <form class="text-lg font-medium">
-        <input type="number" bind:value={weight} placeholder='weight' on:change={submitWeight} 
+        <input type="number" step="0.1" bind:value={weight} placeholder='weight' on:change={submitWeight} 
             class="w-20 px-1 mx-1 bg-transparent text-right cursor-pointer"/>
         <span class="">kg</span>
 </form>

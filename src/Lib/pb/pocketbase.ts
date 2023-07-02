@@ -9,8 +9,5 @@ pb.authStore.onChange((auth) => {
     currentUser.set(pb.authStore.model)
 })
 
-export const authState = writable('')
-export const authCode = writable('')
-export const authVerifier = writable('')
 
 

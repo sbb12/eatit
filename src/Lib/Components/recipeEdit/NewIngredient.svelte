@@ -1,14 +1,12 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { pb } from '../../pb/pocketbase';
-    
-    
+    import BarcodeHandler from '../scanner/BarcodeHandler.svelte';
     import FoodOption from '../tracker/FoodOption.svelte';
 
     const dispatch = createEventDispatcher();
 
     let addEl: HTMLElement;
-
     let name:string = '';
     export let adding: boolean = false;
     let foods: any[] = [];
@@ -80,7 +78,7 @@
                 name: quickName,
                 food: food,
                 quantity: quickQuantity,
-                // cost: quickCost,
+                cost: quickCost ?? 0,
                 measure: 'calories'
             }
             
@@ -90,8 +88,6 @@
             console.log(error)
             return
         }
-
-
         
     }
 
@@ -168,9 +164,10 @@
             {:else if addType = "scan"}
                 <div class="mx-auto p-3">
                     {#if 'BarcodeDetector' in window}
-                        <!-- <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal}/> -->
+                        <p>This is not yet implemented</p>
+                        <!-- <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal} on:addFood={addMeal}/> -->
                     {:else}
-                        <!-- <p class="">Barcode scanning is not supported on your device</p> -->
+                        <p class="">Barcode scanning is not supported on your device</p>
                     {/if}
                 </div>
             {/if}

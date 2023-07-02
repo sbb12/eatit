@@ -17,6 +17,7 @@
     let code = '';
 
     onMount(() => {
+
         if (startDefault){
             startCam();
         }

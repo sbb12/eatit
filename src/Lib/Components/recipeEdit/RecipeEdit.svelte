@@ -81,6 +81,7 @@
         serving_cost = 0;
 
         ingredients.forEach((ingredient) => {
+            console.log(ingredient)
             const option = ingredient.food.options.find((option: any) => option.measure === ingredient.measure);
 
             serving_calories += (option.calories * ingredient.quantity / no_servings);

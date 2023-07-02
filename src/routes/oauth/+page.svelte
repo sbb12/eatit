@@ -1,23 +1,40 @@
 <script lang="ts">
-    import { redirect } from '@sveltejs/kit';
-    import { pb } from '../../lib/pb/pocketbase';
+    import { pb} from '../../lib/pb/pocketbase';
     import { onMount } from 'svelte';
-
-    export let data;
-    console.log(data)
+   
+   
 
     const attempt = async () => {
+
+        const expectedState = localStorage.getItem('authState');
+        const expectedVerifier = localStorage.getItem('authVerifier');
+        const provider = localStorage.getItem('authProvider');
+
+        localStorage.removeItem('authState');
+        localStorage.removeItem('authVerifier');
+        localStorage.removeItem('authProvider');
+
         console.log('trying to auth')
         try {
-            const user = await pb.collection('users').authWithOAuth2Code(
-                data.provider, 
-                data.code,
-                data.expectedVerifier,
-                data.redirectURL,
-                    {name: 'Gman', calorie_goal: 2000}
-                    )
+            const url = new URL(window.location.href)
+            const redirectURL = `${url.origin}/oauth`;
+            const state = await url.searchParams.get('state')!;
+            const code = await url.searchParams.get('code')!;
+        
+            if (state !== expectedState) {
+                console.log('state mismatch')
+                window.location.href = '/login'
+            }
 
-                window.location.href = '/track'
+            const user = await pb.collection('users').authWithOAuth2Code(
+                provider!, 
+                code,
+                expectedVerifier!,
+                redirectURL,
+                {name: 'provider', calorie_goal: 2000}
+            )
+
+            window.location.href = '/track'
                 
         } catch (error) {
             console.log('error ', error)
