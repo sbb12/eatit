@@ -17,7 +17,10 @@
     let code = '';
 
     onMount(() => {
+        // dev
+        // onScan('4088600072517')
 
+        startCam()
         if (startDefault){
             startCam();
         }
@@ -28,9 +31,6 @@
     })
 
     async function startCam(){
-        // const barcode = '4088600057712'
-        // onScan(barcode);
-        // return;
         status = 'Starting camera';
         cameraOverlayEl.classList.remove('hidden');
 

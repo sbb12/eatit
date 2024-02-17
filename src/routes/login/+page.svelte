@@ -1,11 +1,12 @@
 <script>
 	import { onMount } from "svelte";
-    import Login from "../../lib/components/Login.svelte";
-    import { currentUser } from "../../lib/pb/pocketbase";
+    import Login from "./Login.svelte";
+    import { currentUser } from "$lib/pb/pocketbase";
+	import { goto } from "$app/navigation";
 
     onMount(() => {
         if ($currentUser) {
-            window.location.href = '/track'
+            goto('/track')
         }
     })    
 </script>

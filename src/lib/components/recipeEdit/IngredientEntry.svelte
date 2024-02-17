@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    
     const dispatch = createEventDispatcher();
 
     export let food: {id: string, name: string, image: string, collectionId: string, options: any[], brands: string};
@@ -27,11 +28,11 @@
 
 
 
-<div class="grid grid-cols-8 items-center">
+<div class="grid grid-cols-8 items-center w-full">
     <img src="{image}?thumb=50x50" alt='placeholder' class="col-span-1 " height="45px" width="45px" title="{food.brands}"/>
     <p class="col-span-3 p-1 text-sm" title="{food.brands}">{name}</p>  
     <input type="number" placeholder="qty" bind:value={quantity} class="px-1 mr-2 focus:outline-none h-6 rounded-sm drop-shadow text-sm" on:change={updateNumbers}>
-    <select class="col-span-1 focus:outline-none h-6 mr-[-20px] rounded-sm drop-shadow text-sm" bind:value={measure} on:change={updateNumbers}>
+    <select class="col-span-1 focus:outline-none h-6 rounded-sm drop-shadow text-sm" bind:value={measure} on:change={updateNumbers}>
         {#each options as option (option)}
                 <option value="{option.measure}" title="{option.desc ? option.desc : ''}" >
                     {option.measure}

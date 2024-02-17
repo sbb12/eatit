@@ -8,7 +8,7 @@
     import IngredientEntry from './IngredientEntry.svelte';
     import NewStep from './NewStep.svelte';
     import ImageHandler from '../foodEdit/ImageHandler.svelte';
-    import NutritionPie from '../tracker/NutritionPie.svelte';
+    import NutritionPie from '../NutritionPie.svelte';
 
     import AutoTextArea from '../AutoTextArea.svelte';
 
@@ -36,12 +36,10 @@
     $: ingredients && calcNutrition();
     $: no_servings && calcNutrition();
 
-    onMount(async () => {       
-        
+    onMount(async () => {               
         if (id) {
             try {
                 const record = await pb.collection('recipes').getOne(id);     
-
 
                 name = record.name;
                 no_servings = record.no_servings;
@@ -81,14 +79,18 @@
         serving_cost = 0;
 
         ingredients.forEach((ingredient) => {
-            console.log(ingredient)
-            const option = ingredient.food.options.find((option: any) => option.measure === ingredient.measure);
+            console.log(ingredient)            
+            const option = ingredient.food.options.find((option: any) => option.measure === ingredient.measure);            
 
-            serving_calories += (option.calories * ingredient.quantity / no_servings);
-            serving_protein +=  (option.protein * ingredient.quantity / no_servings );
-            serving_fat +=  (option.fat * ingredient.quantity / no_servings );
-            serving_carbs +=  (option.carbs * ingredient.quantity / no_servings );
-            serving_cost +=  (option.cost * ingredient.quantity / no_servings);
+            if (option){
+                serving_calories += (option.calories * ingredient.quantity / no_servings);
+                serving_protein +=  (option.protein * ingredient.quantity / no_servings );
+                serving_fat +=  (option.fat * ingredient.quantity / no_servings );
+                serving_carbs +=  (option.carbs * ingredient.quantity / no_servings );
+                serving_cost +=  (option.cost * ingredient.quantity / no_servings);
+            } else {
+                console.log('no option', ingredient)
+            }
         })
 
         serving_calories = Math.round(serving_calories);
@@ -114,7 +116,8 @@
 
     }
 
-    function addIngredient(event: CustomEvent) {        
+    function addIngredient(event: CustomEvent) {       
+        console.log('addIngredient') 
         const ingredient = {
             food: event.detail.food,
             name: event.detail.name,
@@ -126,8 +129,7 @@
 
     function removeIngredient(event: CustomEvent) {
         ingredients = ingredients.filter((ingredient) => ingredient.food.id !== event.detail);
-    }
-    
+    }    
 
     async function saveRecipe() {
 
@@ -167,7 +169,8 @@
             try{
                 const record = await pb.collection('recipes').update(id, formData);
                 id = record.id;
-                saveRecipeAsFood();
+                alert('Recipe updated successfully')
+                close()
             } catch (e) {
                 console.log('could not update record: ' + id, e);
             }
@@ -179,12 +182,15 @@
             }
             try {
                 const record = await pb.collection('recipes').create(formData);
-                saveRecipeAsFood();
                 id = record.id;
+                alert('Recipe created successfully')
+                close()
             } catch (e) {
                 console.log('could not create record', e);
             }
         }
+
+        await saveRecipeAsFood()
     }
 
     async function saveRecipeAsFood(){
@@ -214,9 +220,9 @@
         // try update
         try {
             // update record if exists
-            const foodRecord = await pb.collection('foods').getFirstListItem(`recipe.id = "${id}"`);
-            
-            const record = await pb.collection('foods').update(foodRecord.id, formData);
+            const foodRecord = await pb.collection('foods').getFirstListItem(`recipe.id = "${id}"`);            
+            console.log(id)
+            // const record = await pb.collection('foods').update(foodRecord.id, formData);
 
         } catch (e) {
             // create new record
@@ -282,7 +288,7 @@
 
 
 
-<div class="inline-flex">
+<div class="flex flex-col lg:flex-row">
 
     <div class="bg-[#F6F6F6] p-4 w-[100%] max-w-[500px] z-50 relative">
         <input type="hidden" bind:value={id}>
@@ -366,5 +372,4 @@
             <NutritionPie labels={['protein', 'carbs', 'fat']} values={[serving_protein, serving_carbs, serving_fat]} cost={serving_cost} />
         </div>
     </div>
-
 </div>

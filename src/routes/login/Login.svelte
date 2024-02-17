@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { pb } from "../pb/pocketbase";
-    import LoadingRings from "./LoadingRings.svelte";
+	import { pb } from "$lib/pb/pocketbase";
+    import LoadingRings from "$lib/components/LoadingRings.svelte";
     import ProviderLogin from "./ProviderLogin.svelte";
     
     let emailEl: HTMLInputElement;
@@ -29,7 +29,9 @@
         }
 
         try {
-            await pb.collection('users').authWithPassword(email, password);
+            await pb.collection('users').authWithPassword(email, password, {
+                "expand": 'calorie_goal'
+            });
             loggingIn = false;
             window.location.href = '/track'
         } catch (error) {
@@ -87,7 +89,7 @@
         guestLoging = true;
 
         try {
-            await pb.collection('users').authWithPassword('guest', 'guestguest');
+            await pb.collection('users').authWithPassword('guest', 'guest');
             loggingIn = false;
             window.location.href = '/track'
         } catch (error) {

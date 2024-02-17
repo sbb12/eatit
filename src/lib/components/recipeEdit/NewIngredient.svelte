@@ -2,7 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import { pb } from '../../pb/pocketbase';
     import BarcodeHandler from '../scanner/BarcodeHandler.svelte';
-    import FoodOption from '../tracker/FoodOption.svelte';
+    import FoodOption from '$lib/components/FoodOption.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -64,8 +64,8 @@
         addType = 'db';
     }
 
-    function addIngredient(food: any){
-        dispatch('addIngredient', food.detail);
+    function addIngredient(event: any){
+        dispatch('addIngredient', event.detail);
         resetOptions();
     }
 
@@ -79,9 +79,10 @@
                 food: food,
                 quantity: quickQuantity,
                 cost: quickCost ?? 0,
-                measure: 'calories'
+                measure: food.options[0].measure,
             }
-            
+
+            // console.log(data)
             dispatch('addIngredient', data);
 
         } catch (error) {
@@ -164,8 +165,8 @@
             {:else if addType = "scan"}
                 <div class="mx-auto p-3">
                     {#if 'BarcodeDetector' in window}
-                        <p>This is not yet implemented</p>
-                        <!-- <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal} on:addFood={addMeal}/> -->
+                        <!-- <p>This is not yet implemented</p> -->
+                        <BarcodeHandler startDefault={true} on:foundFood={addIngredient} on:addFood={addIngredient}/>
                     {:else}
                         <p class="">Barcode scanning is not supported on your device</p>
                     {/if}

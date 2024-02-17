@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { pb } from '../../pb/pocketbase';
+    import { pb } from '$lib/pb/pocketbase';
     
     export let weight: number|null = null;
     export let id: string;

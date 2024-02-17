@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@picocss/pico": "^1.5.6",
 		"chart.js": "^4.1.2",
+		"openfoodfacts-nodejs": "^0.1.0",
 		"pocketbase": "^0.15.0",
 		"three": "^0.148.0"
 	}

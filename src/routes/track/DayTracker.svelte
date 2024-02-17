@@ -1,9 +1,9 @@
 <script lang='ts'>
     import { onMount } from 'svelte';
     import { Datepicker } from 'svelte-calendar';
-	import { currentUser, pb } from '../../pb/pocketbase';
+	import { currentUser, pb } from '$lib/pb/pocketbase';
     import MealEntry from './MealEntry.svelte';
-    import NewMeal from './NewMeal.svelte';
+    import NewMeal from '$lib/components/NewMeal.svelte';
     import Weight from './Weight.svelte';
     import NutritionPie from './NutritionPie.svelte';
 

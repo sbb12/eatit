@@ -11,7 +11,7 @@
     let browserSupported = false;
     let msg: string = '';
     let promptAdd = false;
-    let apiData;
+    let apiData: any;
 
     onMount(async () => {
         browserSupported = 'BarcodeDetector' in window
@@ -78,6 +78,36 @@
         const servings = []
 
         // check for serving sizes
+        if (data.product.nutriments['energy']){
+            servings.push({
+                measure: 'default',
+                calories: data.product.nutriments['energy'],
+                protein: data.product.nutriments.proteins,
+                carbs: data.product.nutriments.carbohydrates,
+                fat: data.product.nutriments.fat,
+                desc: 'default'
+            })
+        }
+        if (data.product.nutriments["energy-kcal"]){
+            servings.push({
+                measure: 'kcal',
+                calories: data.product.nutriments["energy-kcal"],
+                protein: data.product.nutriments.proteins,
+                carbs: data.product.nutriments.carbohydrates,
+                fat: data.product.nutriments.fat,
+                desc: 'kcal'                
+            })
+        }
+        if (data.product.nutriments['energy-kcal_100g']) {
+            servings.push({
+                measure: 'g',
+                calories: data.product.nutriments['energy-kcal_100g'] / 100,
+                protein: data.product.nutriments.proteins_100g / 100,
+                carbs: data.product.nutriments.carbohydrates_100g / 100,
+                fat: data.product.nutriments.fat_100g / 100,
+                desc: ''                  
+            })
+        }
         if (data.product.nutriments['energy-kcal_serving']) {
             servings.push({
                 measure: 'serving',
@@ -98,16 +128,7 @@
                 desc:  data.product.prepared_serving_size ? data.product.serving_size :  Math.round(100 * parseInt(data.product.nutriments['energy-kcal_prepared_serving']) / parseInt(data.product.nutriments['energy-kcal_100g']))                    
             })
         }
-        if (data.product.nutriments['energy-kcal_100g']) {
-            servings.push({
-                measure: 'g',
-                calories: data.product.nutriments['energy-kcal_100g'] / 100,
-                protein: data.product.nutriments.proteins_100g / 100,
-                carbs: data.product.nutriments.carbohydrates_100g / 100,
-                fat: data.product.nutriments.fat_100g / 100,
-                desc: ''                  
-            })
-        }
+        
 
         // parse data 
         const product = {

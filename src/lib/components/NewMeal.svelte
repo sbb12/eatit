@@ -1,16 +1,18 @@
 <script lang="ts">
 
-    import { pb } from '../../pb/pocketbase';
-    import FoodOption from './FoodOption.svelte';
-    import BarcodeHandler from '../scanner/BarcodeHandler.svelte';
+    import { pb } from '../pb/pocketbase';
+    import FoodOption from '$lib/components/FoodOption.svelte';
+    import BarcodeHandler from '$lib/components/scanner/BarcodeHandler.svelte';
     import { createEventDispatcher } from 'svelte';
+	import type { Food } from '$lib/types';
     const dispatch = createEventDispatcher();
 
-    export let dayID: string;
+    export let dayID = ''
+
     let name:string = '';
     let adding: boolean = false;
-    let foods_results: any[] = [];
-    let foods: any[] = [];
+    let foodsResults: Food[] = []
+    let foodList: Food[] = [];
 
     let addType: string = 'db';
     let includeBasic: boolean = true;
@@ -21,25 +23,26 @@
     let quickName: string = '';
     let quickQuantity: number|null;
 
-    $: {name, searchFoods()}
+    $: { name, searchFoods()}
     $: {includeBasic, includeBranded, includeRecipe, filterFoodsByIncludes()}
 
     let addEl: HTMLElement;
 
     async function searchFoods() {
         if (name.length < 1) {
-            foods = [];
+            foodList = [];
             return;
         } 
-        foods = [];
+        foodList = [];
         try {
             // get records
-            foods_results = await pb.collection('foods').getList(1, 15, {
+            const response = await pb.collection('foods').getList(1, 15, {
                 filter: 'name ~ "' + name + '" || brands ~ "' + name + '"',
                 sort: 'created'
-            })            
+            })
 
-            foods_results = foods_results.items.sort((a: any, b: any) => {
+            // filter
+            foodsResults = response.items.sort((a: any, b: any) => {
                 const pattern = new RegExp(name, 'g');
                 
                 const occursA =  a.name.match(pattern)?.length || 0;
@@ -49,7 +52,7 @@
                 const coverB = occursB / b.name.length;
                 
                 return coverB - coverA;
-            })            
+            }) as unknown as Food[];          
 
             filterFoodsByIncludes();
 
@@ -60,9 +63,9 @@
 
     function filterFoodsByIncludes(){
         if (includeBasic && includeBranded && includeRecipe) {
-            foods = foods_results;
+            foodList = foodsResults;
         }
-        foods = foods_results.filter((food: any) => {
+        foodList = foodsResults.filter((food: any) => {
             if (food.type === 'basic' && includeBasic) {
                 return true;
             }
@@ -78,7 +81,7 @@
 
     async function getFood(id: string){
         try{
-            const food = await pb.collection('foods').getOne(id, {});
+            const food = await pb.collection('foods').getOne(id);
             return food;
         } catch (error) {
             console.log(error)
@@ -93,35 +96,24 @@
             console.log("couldn't fetch quick cal food data")
             return;
         }
-
+        
         const data = {
             day: dayID,
             name: quickName,
-            food: '448ohrs7rgvbxak',
             quantity: quickQuantity,
-            measure: 'cal',
             calories: quickQuantity,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            cost: 0,
+            measure: 'cal',
+            food: food.id,
         }
-
-        try {
-            const newEntry = await pb.collection('meal_entry').create(data);
-            resetOptions()           
-
-            dispatch('addMeal', {
-                entry: newEntry,
-                food: food
-            });           
-        } catch (error) {
-            console.log(error);
-        }
+        console.log(data)
+        const newEntry = await pb.collection('meal_entry').create(data);
+        console.log(newEntry)
+        resetOptions()
+        dispatch('addMeal', {entry: newEntry, food});
 
     }
 
-    async function addMeal(event: any) {
+    async function addMeal(event: any) {        
 
         const data = {
             day: dayID,
@@ -139,6 +131,7 @@
         try {
             const newEntry = await pb.collection('meal_entry').create(data);
             resetOptions()
+            console.log(newEntry)
             
             dispatch('addMeal', {
                 entry: newEntry,
@@ -246,9 +239,9 @@
                         </label>
                     </div>
                     
-                    {#if foods.length > 0}
+                    {#if foodList.length > 0}
                         <ul class="col-span-full">
-                            {#each foods as food (food.id)}
+                            {#each foodList as food (food.id)}
                                 <FoodOption {food} on:addMeal={addMeal}/>
                             {/each}
                         </ul>
@@ -256,8 +249,8 @@
                 </form>
             {:else if addType = "scan"}
                 <div class="mx-auto p-3">
-                    {#if 'BarcodeDetector' in window}
-                        <BarcodeHandler {dayID} startDefault={true} on:foundFood={addMeal} on:addFood={addMeal}/>
+                    {#if 'BarcodeDetector' in window }
+                        <BarcodeHandler startDefault={true} on:foundFood={addMeal} on:addFood={addMeal}/>
                     {:else}
                         <p class="">Barcode scanning is not supported on your device</p>
                     {/if}
